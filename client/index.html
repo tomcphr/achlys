@@ -4,6 +4,8 @@
 <script>
     var canvas = document.getElementById("ctx");
     var ctx = canvas.getContext("2d");
+    ctx.font = "15px Verdana";
+    ctx.textAlign = "center";
 
     var socket = io();
 
@@ -13,6 +15,7 @@
     socket.on("positions", function (data) {
         ctx.clearRect(0, 0, 480, 320);
         for (var i = 0; i < data.length; i++) {
+            ctx.fillText("a", data[i].x + 23, data[i].y);
             drawPlayer(
                 data[i].facing,
                 data[i].frame,
@@ -80,16 +83,19 @@
                 break;
         }
 
+        var width = 24;
+        var height = 32;
+
         ctx.drawImage(
             playerImage,
             24 * frame,
             imageY,
-            24,
-            32,
+            width,
+            height,
             x,
             y,
-            24,
-            32
+            width * 2,
+            height * 2
         );
     }
 

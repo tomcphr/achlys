@@ -13,13 +13,17 @@ var port = 80;
 host.listen(port);
 console.log("Listening on Port '" + port + "'");
 
+var PouchDB = require("pouchdb");
+var db = new PouchDB("database");
+
 var sockets = {};
 var players = {};
 
 var Player = function (id) {
     var object = {
-        "x"         :   Math.random() * (480 - 0) + 0,
-        "y"         :   Math.random() * (320 - 0) + 0,
+        "id"        :   id,
+        "x"         :   Math.random() * (240 - 0) + 0,
+        "y"         :   Math.random() * (160 - 0) + 0,
         "keys"      :   {
             "left"      :   false,
             "right"     :   false,
@@ -29,7 +33,7 @@ var Player = function (id) {
         "facing"    :   "down",
         "walking"   :   false,
         "frame"     :   1,
-        "speed"     :   10,
+        "speed"     :   15,
     };
 
     object.updatePosition = function () {
@@ -66,7 +70,7 @@ io.sockets.on("connection", function (socket) {
 
     sockets[session] = socket;
 
-    var user = Math.random();
+    var user = Math.ceil(Math.random() * 1000);
     var player = new Player(user);
     players[user] = player;
 
@@ -104,6 +108,7 @@ setInterval(function () {
         player.updatePosition();
         player.updateFrame();
         positions.push({
+            "id"        :   player.id,
             "facing"    :   player.facing,
             "frame"     :   player.frame,
             "x"         :   player.x,
@@ -116,4 +121,4 @@ setInterval(function () {
 
         socket.emit("positions", positions);
     }
-}, 1000 / 15);
+}, 1000 / 17);
