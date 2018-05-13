@@ -5,9 +5,9 @@ ctx.textAlign = "center";
 
 var socket = io();
 
-var username = prompt('What\'s your username?');
+var username = prompt("What's your username?");
 while (!username) {
-    username = prompt('What\'s your username?');
+    username = prompt("What's your username?");
 };
 socket.emit('adduser', username);
 
