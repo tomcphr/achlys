@@ -1,4 +1,4 @@
-<canvas id='ctx' width='240' height='160'></canvas>
+<canvas id='ctx' width='480' height='320'></canvas>
 <link rel='stylesheet' type='text/css' href='css/index.css'>
 <script src='https://cdn.socket.io/socket.io-1.4.5.js'></script>
 <script>
@@ -11,7 +11,7 @@
     playerImage.src = "/img/player.png";
 
     socket.on("positions", function (data) {
-        ctx.clearRect(0, 0, 240, 160);
+        ctx.clearRect(0, 0, 480, 320);
         for (var i = 0; i < data.length; i++) {
             drawPlayer(
                 data[i].facing,

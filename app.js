@@ -18,8 +18,8 @@ var players = {};
 
 var Player = function (id) {
     var object = {
-        "x"         :   0,
-        "y"         :   0,
+        "x"         :   Math.random() * (480 - 0) + 0,
+        "y"         :   Math.random() * (320 - 0) + 0,
         "keys"      :   {
             "left"      :   false,
             "right"     :   false,
@@ -70,10 +70,12 @@ io.sockets.on("connection", function (socket) {
     var player = new Player(user);
     players[user] = player;
 
-    console.log("New socket connection:" + session);
+    var detail = "[session: " + session + ", x: " + player.x + ", y: " + player.y + "]";
+
+    console.log("Login - " + detail);
 
     socket.on("disconnect", function () {
-        console.log("Socket connection disconnected: " + session);
+        console.log("Logout - " + detail);
         delete sockets[session];
         delete players[user];
     });
