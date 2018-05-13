@@ -9,13 +9,19 @@
 
     var socket = io();
 
+    var username = prompt('What\'s your username?');
+    while (!username) {
+        username = prompt('What\'s your username?');
+    };
+    socket.emit('adduser', username);
+
     var playerImage = new Image();
     playerImage.src = "/img/player.png";
 
     socket.on("positions", function (data) {
         ctx.clearRect(0, 0, 480, 320);
         for (var i = 0; i < data.length; i++) {
-            ctx.fillText("a", data[i].x + 23, data[i].y);
+            ctx.fillText(data[i].id, data[i].x + 23, data[i].y);
             drawPlayer(
                 data[i].facing,
                 data[i].frame,

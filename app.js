@@ -70,36 +70,43 @@ io.sockets.on("connection", function (socket) {
 
     sockets[session] = socket;
 
-    var user = Math.ceil(Math.random() * 1000);
-    var player = new Player(user);
-    players[user] = player;
-
-    var detail = "[session: " + session + ", x: " + player.x + ", y: " + player.y + "]";
-
-    console.log("Login - " + detail);
-
-    socket.on("disconnect", function () {
-        console.log("Logout - " + detail);
-        delete sockets[session];
-        delete players[user];
-    });
-
-    socket.on("keyPress", function (data) {
-        var type = data.type;
-        if (!type) {
+    socket.on("adduser", function (name) {
+        if (players.hasOwnProperty(name)) {
+            console.log("Username already in use");
             return;
         }
 
-        player.keys[type] = data.state;
+        var player = new Player(name);
+        players[name] = player;
 
-        if (data.state) {
-            player.facing = type;
-            player.walking = true;
-        } else {
-            player.walking = false;
-        }
+        var detail = "[session: " + session + ", user: " + name + ", x: " + player.x + ", y: " + player.y + "]";
+
+        console.log("Login - " + detail);
+
+        socket.on("disconnect", function () {
+            console.log("Logout - " + detail);
+            delete sockets[session];
+            delete players[name];
+        });
+
+        socket.on("keyPress", function (data) {
+            var type = data.type;
+            if (!type) {
+                return;
+            }
+
+            player.keys[type] = data.state;
+
+            if (data.state) {
+                player.facing = type;
+                player.walking = true;
+            } else {
+                player.walking = false;
+            }
+        });
     });
 });
+
 
 setInterval(function () {
     var positions = [];
