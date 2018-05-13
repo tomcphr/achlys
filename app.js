@@ -37,6 +37,14 @@ var Player = function (id) {
         "speed"     :   15,
     };
 
+    object.resetFacing = function () {
+        for (var property in object.keys) {
+            if (object.keys.hasOwnProperty(property)) {
+                object.keys[property] = false;
+            }
+        }
+    }
+
     object.updatePosition = function () {
         if (object.keys.right) {
             object.x += object.speed;
@@ -85,6 +93,8 @@ io.sockets.on("connection", function (socket) {
         console.log("Login - " + detail);
 
         socket.on("disconnect", function () {
+            var player = players[name];
+            var detail = "[session: " + session + ", user: " + name + ", x: " + player.x + ", y: " + player.y + "]";
             console.log("Logout - " + detail);
             delete sockets[session];
             delete players[name];
@@ -95,6 +105,8 @@ io.sockets.on("connection", function (socket) {
             if (!type) {
                 return;
             }
+
+            player.resetFacing();
 
             player.keys[type] = data.state;
 
