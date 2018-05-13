@@ -6,6 +6,8 @@ app.get("/", function (req, res) {
     res.sendFile(__dirname + "/client/index.html");
 });
 app.use("/client", express.static(__dirname + "/client"));
+app.use("/img", express.static(__dirname + "/client/img"));
+app.use("/css", express.static(__dirname + "/client/css"));
 
 var port = 80;
 host.listen(port);
@@ -16,15 +18,18 @@ var players = {};
 
 var Player = function (id) {
     var object = {
-        "x"     :   250,
-        "y"     :   250,
-        "keys"  :   {
-            "left"  :   false,
-            "right" :   false,
-            "up"    :   false,
-            "down"  :   false,
+        "x"         :   0,
+        "y"         :   0,
+        "keys"      :   {
+            "left"      :   false,
+            "right"     :   false,
+            "up"        :   false,
+            "down"      :   false,
         },
-        "speed" :   10,
+        "facing"    :   "down",
+        "walking"   :   false,
+        "frame"     :   1,
+        "speed"     :   10,
     };
 
     object.updatePosition = function () {
@@ -36,6 +41,18 @@ var Player = function (id) {
             object.y -= object.speed;
         } else if (object.keys.down) {
             object.y += object.speed;
+        }
+    }
+
+    object.updateFrame = function () {
+        if (object.walking) {
+            if (object.frame < 2) {
+                object.frame++;
+            } else {
+                object.frame = 0;
+            }
+        } else {
+            object.frame = 1;
         }
     }
 
@@ -62,7 +79,19 @@ io.sockets.on("connection", function (socket) {
     });
 
     socket.on("keyPress", function (data) {
-        player.keys[data.type] = data.state;
+        var type = data.type;
+        if (!type) {
+            return;
+        }
+
+        player.keys[type] = data.state;
+
+        if (data.state) {
+            player.facing = type;
+            player.walking = true;
+        } else {
+            player.walking = false;
+        }
     });
 });
 
@@ -71,9 +100,12 @@ setInterval(function () {
     for (var i in players) {
         var player = players[i];
         player.updatePosition();
+        player.updateFrame();
         positions.push({
-            "x" :   player.x,
-            "y" :   player.y,
+            "facing"    :   player.facing,
+            "frame"     :   player.frame,
+            "x"         :   player.x,
+            "y"         :   player.y,
         });
     }
 
@@ -82,4 +114,4 @@ setInterval(function () {
 
         socket.emit("positions", positions);
     }
-}, 1000 / 25);
+}, 1000 / 15);

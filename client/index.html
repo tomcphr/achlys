@@ -1,17 +1,24 @@
-<canvas id='ctx' width='500' height='500' style='border: 1px solid #000'>
-</canvas>
+<canvas id='ctx' width='240' height='160'></canvas>
+<link rel='stylesheet' type='text/css' href='css/index.css'>
 <script src='https://cdn.socket.io/socket.io-1.4.5.js'></script>
 <script>
     var canvas = document.getElementById("ctx");
     var ctx = canvas.getContext("2d");
-    ctx.font = "30px Arial";
 
     var socket = io();
 
+    var playerImage = new Image();
+    playerImage.src = "/img/player.png";
+
     socket.on("positions", function (data) {
-        ctx.clearRect(0, 0, 500, 500);
+        ctx.clearRect(0, 0, 240, 160);
         for (var i = 0; i < data.length; i++) {
-            ctx.fillText("P", data[i].x, data[i].y);
+            drawPlayer(
+                data[i].facing,
+                data[i].frame,
+                data[i].x,
+                data[i].y
+            );
         }
     });
 
@@ -20,39 +27,70 @@
         socket.emit("keyPress", {
             "type"  :   type,
             "state" :   true,
-        })
+        });
     }
+
     document.onkeyup = function (event) {
         var type = keyPress(event.keyCode);
         socket.emit("keyPress", {
             "type"  :   type,
             "state" :   false,
-        })
+        });
     }
 
     function keyPress (key) {
         switch (key) {
             case 68:
             case 39:
-                var type = "right";
-                break;
+                return "right";
 
             case 83:
             case 40:
-                var type = "down";
-                break;
+                return "down";
 
             case 65:
             case 37:
-                var type = "left";
-                break;
+                return "left";
 
             case 87:
             case 38:
-                var type = "up";
+                return "up";
+
+            default:
+                return 0;
+        }
+    }
+
+    function drawPlayer (direction, frame, x, y) {
+        switch (direction) {
+            case "up":
+                var imageY = 0;
+                break;
+
+            case "right":
+                var imageY = 32;
+                break;
+
+            case "down":
+                var imageY = 64;
+                break;
+
+            case "left":
+                var imageY = 96;
                 break;
         }
 
-        return type;
+        ctx.drawImage(
+            playerImage,
+            24 * frame,
+            imageY,
+            24,
+            32,
+            x,
+            y,
+            24,
+            32
+        );
     }
+
 </script>
