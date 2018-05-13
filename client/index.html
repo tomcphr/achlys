@@ -1,0 +1,58 @@
+<canvas id='ctx' width='500' height='500' style='border: 1px solid #000'>
+</canvas>
+<script src='https://cdn.socket.io/socket.io-1.4.5.js'></script>
+<script>
+    var canvas = document.getElementById("ctx");
+    var ctx = canvas.getContext("2d");
+    ctx.font = "30px Arial";
+
+    var socket = io();
+
+    socket.on("positions", function (data) {
+        ctx.clearRect(0, 0, 500, 500);
+        for (var i = 0; i < data.length; i++) {
+            ctx.fillText("P", data[i].x, data[i].y);
+        }
+    });
+
+    document.onkeydown = function (event) {
+        var type = keyPress(event.keyCode);
+        socket.emit("keyPress", {
+            "type"  :   type,
+            "state" :   true,
+        })
+    }
+    document.onkeyup = function (event) {
+        var type = keyPress(event.keyCode);
+        socket.emit("keyPress", {
+            "type"  :   type,
+            "state" :   false,
+        })
+    }
+
+    function keyPress (key) {
+        switch (key) {
+            case 68:
+            case 39:
+                var type = "right";
+                break;
+
+            case 83:
+            case 40:
+                var type = "down";
+                break;
+
+            case 65:
+            case 37:
+                var type = "left";
+                break;
+
+            case 87:
+            case 38:
+                var type = "up";
+                break;
+        }
+
+        return type;
+    }
+</script>
