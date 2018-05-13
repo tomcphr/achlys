@@ -6,6 +6,7 @@ app.get("/", function (req, res) {
     res.sendFile(__dirname + "/client/index.html");
 });
 app.use("/client", express.static(__dirname + "/client"));
+app.use("/js", express.static(__dirname + "/client/js"));
 app.use("/img", express.static(__dirname + "/client/img"));
 app.use("/css", express.static(__dirname + "/client/css"));
 
