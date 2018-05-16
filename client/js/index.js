@@ -1,31 +1,96 @@
 var canvas = document.getElementById("ctx");
 var ctx = canvas.getContext("2d");
-ctx.font = "15px Verdana";
+ctx.font = "16px Verdana";
 ctx.textAlign = "center";
 
 var socket = io();
 
-var username = prompt("What's your username?");
-while (!username) {
-    username = prompt("What's your username?");
-};
-socket.emit('adduser', username);
-
 var playerImage = new Image();
 playerImage.src = "/img/player.png";
+var playerWidth = 24;
+var playerHeight = 32;
 
-socket.on("positions", function (data) {
-    ctx.clearRect(0, 0, 480, 320);
-    for (var i = 0; i < data.length; i++) {
-        ctx.fillText(data[i].id, data[i].x + 23, data[i].y);
-        drawPlayer(
-            data[i].facing,
-            data[i].frame,
-            data[i].x,
-            data[i].y
-        );
-    }
+var username = null;
+getHtml("/login", function (data) {
+    var login = {
+        "login" :   {
+            title: "Login",
+            html: data.documentElement.innerHTML,
+        	buttons: {Login: 1},
+        	submit: function(event, value, m, form) {
+        	    event.preventDefault();
+        	    
+        		username = form.username;
+                
+        		socket.emit("validate", form, function (valid) {
+        		    if (valid) {
+        		        $.prompt.close();
+        		        socket.emit("adduser", username);
+        		        runGame();
+        		        return;
+        		    }
+        		    $.prompt.goToState("error", true);
+                });
+        	}
+        },
+        "error" :   {
+            html: "Invalid username or password provided",
+            buttons: {Ok: 1},
+            submit: function(event) {
+                event.preventDefault();
+                $.prompt.goToState("login");
+            }
+        }
+    };
+    $.prompt(login);
 });
+
+function runGame () {
+    socket.on("positions", function (data) {
+        ctx.clearRect(0, 0, $("#ctx").attr("width"), $("#ctx").attr("height"));
+        for (var i = 0; i < data.length; i++) {
+            // Don't show the players own username above their character
+            if (data[i].id !== username) {
+                ctx.fillText(data[i].id, data[i].x + ((playerWidth * 3) / 2), data[i].y);
+            }
+            drawPlayer(
+                data[i].facing,
+                data[i].frame,
+                data[i].x,
+                data[i].y
+            );
+            ctx.rect(data[i].x,data[i].y,playerWidth * 3,playerHeight * 3);
+            ctx.stroke();
+        }
+    });
+}
+
+
+/**
+ * Get HTML asynchronously
+ * @param  {String}   url      The URL to get HTML from
+ * @param  {Function} callback A callback funtion. Pass in "response" variable to use returned HTML.
+ */
+function getHtml (url, callback) {
+
+	// Feature detection
+	if ( !window.XMLHttpRequest ) return;
+
+	// Create new request
+	var xhr = new XMLHttpRequest();
+
+	// Setup callback
+	xhr.onload = function() {
+		if ( callback && typeof( callback ) === 'function' ) {
+			callback( this.responseXML );
+		}
+	}
+
+	// Get the HTML
+	xhr.open( 'GET', url );
+	xhr.responseType = 'document';
+	xhr.send();
+};
 
 document.onkeydown = function (event) {
     var type = keyPress(event.keyCode);
@@ -73,30 +138,27 @@ function drawPlayer (direction, frame, x, y) {
             break;
 
         case "right":
-            var imageY = 32;
+            var imageY = playerHeight;
             break;
 
         case "down":
-            var imageY = 64;
+            var imageY = playerHeight * 2;
             break;
 
         case "left":
-            var imageY = 96;
+            var imageY = playerHeight * 3;
             break;
     }
 
-    var width = 24;
-    var height = 32;
-
     ctx.drawImage(
         playerImage,
-        24 * frame,
+        playerWidth * frame,
         imageY,
-        width,
-        height,
+        playerWidth,
+        playerHeight,
         x,
         y,
-        width * 2,
-        height * 2
+        playerWidth * 3,
+        playerHeight * 3
     );
 }

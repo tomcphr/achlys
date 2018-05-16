@@ -1,6 +1,7 @@
 var express = require("express");
 var app = express();
 var host = require("http").Server(app);
+var PouchDB = require("pouchdb");
 
 app.get("/", function (req, res) {
     res.sendFile(__dirname + "/client/index.html");
@@ -10,12 +11,15 @@ app.use("/js", express.static(__dirname + "/client/js"));
 app.use("/img", express.static(__dirname + "/client/img"));
 app.use("/css", express.static(__dirname + "/client/css"));
 
+app.get("/login", function (req, res) {
+    res.sendFile(__dirname + "/client/login.html");
+});
+
 var port = 8080;
 host.listen(port);
 console.log("Listening on Port '" + port + "'");
 
-var PouchDB = require("pouchdb");
-var db = new PouchDB("database");
+var database = new PouchDB("database");
 
 var sockets = {};
 var players = {};
@@ -78,13 +82,16 @@ io.sockets.on("connection", function (socket) {
     socket.id = session;
 
     sockets[session] = socket;
-
-    socket.on("adduser", function (name) {
-        if (players.hasOwnProperty(name)) {
-            console.log("Username already in use");
+    
+    socket.on("validate", function (form, fn) {
+        if (players.hasOwnProperty(form.username)) {
+            fn(false);
             return;
         }
+        fn(true);
+    });
 
+    socket.on("adduser", function (name) {
         var player = new Player(name);
         players[name] = player;
 
@@ -141,4 +148,4 @@ setInterval(function () {
 
         socket.emit("positions", positions);
     }
-}, 1000 / 17);
+}, 1000 / 15);
