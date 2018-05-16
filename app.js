@@ -10,7 +10,7 @@ app.use("/js", express.static(__dirname + "/client/js"));
 app.use("/img", express.static(__dirname + "/client/img"));
 app.use("/css", express.static(__dirname + "/client/css"));
 
-var port = 80;
+var port = 8080;
 host.listen(port);
 console.log("Listening on Port '" + port + "'");
 
