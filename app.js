@@ -15,6 +15,9 @@ app.use("/css", express.static(__dirname + "/client/css"));
 app.get("/login", function (req, res) {
     res.sendFile(__dirname + "/client/login.html");
 });
+app.get("/register", function (req, res) {
+    res.sendFile(__dirname + "/client/register.html");
+});
 
 var port = 8080;
 host.listen(port);
@@ -45,7 +48,7 @@ var Player = function (id) {
         for (var key in doc.details) {
             object[key] = doc.details[key];
         }
-    }).catch(function (err) {});
+    }).catch(function () {});
 
     object.resetFacing = function () {
         for (var property in object.keys) {
@@ -103,27 +106,32 @@ io.sockets.on("connection", function (socket) {
                     return;
                 }
                 fn(false);
-            }).catch(function (err) {
-                if (err.status == 404) {
-                    var hash = bcrypt.hashSync(form.password, 10);
-                    database.put({
-                        _id: form.username,
-                        password: hash,
-                        details: {
-                            x: player.x,
-                            y: player.y,
-                            facing: player.facing,
-                        }
-                    });
-                    fn(true);
-                    return;
-                }
+            }).catch(function () {
                 fn(false);
             });
         }
     });
+    
+    socket.on("create", function (form, fn) {
+        if (!form.email) {
+            fn(false, "Email address cannot be blank");
+            return;
+        }
+        
+        if (!form.username) {
+            fn(false, "Username cannot be blank");
+            return;
+        }
+        
+        if (!form.password) {
+            fn(false, "Password cannot be blank");
+            return;
+        }
+        
+        createUser(form.email, form.username, form.password, fn);
+    });
 
-    socket.on("adduser", function (name) {
+    socket.on("runGame", function (name) {
         var player = new Player(name);
         players[name] = player;
 
@@ -161,6 +169,25 @@ io.sockets.on("connection", function (socket) {
     });
 });
 
+function createUser(email, username, password, fn) 
+{
+    database.get(username).then(function (doc) {
+        fn(false, "Username already exists");
+    }).catch(function () {
+        var hash = bcrypt.hashSync(password, 10);
+        database.put({
+            _id: username,
+            password: hash,
+            email: email,
+            details: {
+                x: Math.random() * (240 - 0) + 0,
+                y: Math.random() * (160 - 0) + 0,
+                facing: "down",
+            }
+        });
+        fn(true);
+    });
+}
 
 setInterval(function () {
     var positions = [];

@@ -11,41 +11,87 @@ var playerWidth = 24;
 var playerHeight = 32;
 
 var username = null;
-getHtml("/login", function (data) {
-    var login = {
-        "login" :   {
-            title: "Login",
-            html: data.documentElement.innerHTML,
-        	buttons: {Login: 1},
-        	submit: function(event, value, m, form) {
-        	    event.preventDefault();
-        	    
-        		username = form.username;
-                
-        		socket.emit("validate", form, function (valid) {
-        		    if (valid) {
-        		        $.prompt.close();
-        		        socket.emit("adduser", username);
-        		        runGame();
-        		        return;
-        		    }
-        		    $.prompt.goToState("error", true);
-                });
-        	}
-        },
-        "error" :   {
-            html: "Invalid username or password provided",
-            buttons: {Ok: 1},
-            submit: function(event) {
-                event.preventDefault();
-                $.prompt.goToState("login");
-            }
-        }
-    };
-    $.prompt(login);
+getHtml("/login", function (loginHtml) {
+    getHtml("/register", function (registerHtml) {
+        var login = {
+            "login"     :   {
+                title: "Login",
+                html: loginHtml.documentElement.innerHTML,
+            	buttons: {"Login": "login", "Register": "register", "Forgot?": "forgot"},
+            	submit: function(event, value, message, form) {
+            	    event.preventDefault();
+
+            	    if (value == "register") {
+            	        $.prompt.goToState("register");
+            	    } else if (value == "login") {
+                		validateUser({
+                		    username: form.loginUsername,
+                		    password: form.loginPassword
+                		});
+            	    }
+            	}
+            },
+            "register"  :   {
+                title: "Register",
+                html: registerHtml.documentElement.innerHTML,
+                buttons: {Create: "create"},
+                submit: function (event, value, message, form) {
+                    event.preventDefault();
+                    
+                    socket.emit("create", {
+                        email: form.registerEmail,
+                        username: form.registerUsername,
+                        password: form.registerPassword
+                    }, function (success, message) {
+                        if (success) {
+                            validateUser({
+                    		    username: form.registerUsername,
+                    		    password: form.registerPassword
+                    		});
+                        } else if (message) {
+                            callPromptError(message, "register");
+                        }
+                    });
+                    
+                }
+            },
+            "error"     :   {
+                buttons: {Ok: "errorOk"},
+                submit: function (event) {
+                    event.preventDefault();
+                }
+            },
+        };
+        $.prompt(login);
+    });
 });
 
-function runGame () {
+function validateUser (form) {
+    socket.emit("validate", form, function (valid) {
+	    if (valid) {
+	        $.prompt.close();
+	        runGame(form.username);
+	        return;
+	    }
+	    callPromptError("Invalid username or password", "login");
+    });
+}
+function callPromptError (message, returnState) {
+    $.prompt.goToState("error", true, function () {
+        var currentState = $.prompt.getCurrentState();
+        currentState.find(".jqimessage").html(message);
+        
+        currentState.find(".jqibutton").click(function (event) {
+            $.prompt.goToState(returnState);
+            
+            currentState.find(".jqimessage").html("");
+        });
+    });
+}
+
+function runGame (username) {
+    socket.emit("runGame", username);
+    
     socket.on("positions", function (data) {
         ctx.clearRect(0, 0, $("#ctx").attr("width"), $("#ctx").attr("height"));
         for (var i = 0; i < data.length; i++) {
@@ -71,7 +117,7 @@ function runGame () {
  * @param  {String}   url      The URL to get HTML from
  * @param  {Function} callback A callback funtion. Pass in "response" variable to use returned HTML.
  */
-function getHtml (url, callback) {
+function getHtml(url, callback) {
 
 	// Feature detection
 	if ( !window.XMLHttpRequest ) return;
