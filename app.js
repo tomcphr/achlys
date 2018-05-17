@@ -2,6 +2,7 @@ var express = require("express");
 var app = express();
 var host = require("http").Server(app);
 var PouchDB = require("pouchdb");
+var bcrypt = require("bcrypt");
 
 app.get("/", function (req, res) {
     res.sendFile(__dirname + "/client/index.html");
@@ -40,6 +41,11 @@ var Player = function (id) {
         "frame"     :   1,
         "speed"     :   15,
     };
+    database.get(id).then(function (doc) {
+        for (var key in doc.details) {
+            object[key] = doc.details[key];
+        }
+    }).catch(function (err) {});
 
     object.resetFacing = function () {
         for (var property in object.keys) {
@@ -84,25 +90,53 @@ io.sockets.on("connection", function (socket) {
     sockets[session] = socket;
     
     socket.on("validate", function (form, fn) {
+        var player = new Player(form.username);
+
+        // Ensure that the user isn't already logged in
         if (players.hasOwnProperty(form.username)) {
             fn(false);
             return;
+        } else {
+            database.get(form.username).then(function (doc) {
+                if (bcrypt.compareSync(form.password, doc.password)) {
+                    fn(true);
+                    return;
+                }
+                fn(false);
+            }).catch(function (err) {
+                if (err.status == 404) {
+                    var hash = bcrypt.hashSync(form.password, 10);
+                    database.put({
+                        _id: form.username,
+                        password: hash,
+                        details: {
+                            x: player.x,
+                            y: player.y,
+                            facing: player.facing,
+                        }
+                    });
+                    fn(true);
+                    return;
+                }
+                fn(false);
+            });
         }
-        fn(true);
     });
 
     socket.on("adduser", function (name) {
         var player = new Player(name);
         players[name] = player;
 
-        var detail = "[session: " + session + ", user: " + name + ", x: " + player.x + ", y: " + player.y + "]";
-
-        console.log("Login - " + detail);
-
         socket.on("disconnect", function () {
             var player = players[name];
-            var detail = "[session: " + session + ", user: " + name + ", x: " + player.x + ", y: " + player.y + "]";
-            console.log("Logout - " + detail);
+
+            database.get(name).then(function (doc) {
+                doc.details.x = player.x;
+                doc.details.y = player.y;
+                doc.details.facing = player.facing;
+                return database.put(doc);
+            });
+
             delete sockets[session];
             delete players[name];
         });
