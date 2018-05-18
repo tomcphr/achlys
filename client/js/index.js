@@ -34,25 +34,28 @@ getHtml("/login", function (loginHtml) {
             "register"  :   {
                 title: "Register",
                 html: registerHtml.documentElement.innerHTML,
-                buttons: {Create: "create"},
+                buttons: {"Back": "back", "Create": "create"},
                 submit: function (event, value, message, form) {
                     event.preventDefault();
                     
-                    socket.emit("create", {
-                        email: form.registerEmail,
-                        username: form.registerUsername,
-                        password: form.registerPassword
-                    }, function (success, message) {
-                        if (success) {
-                            validateUser({
-                    		    username: form.registerUsername,
-                    		    password: form.registerPassword
-                    		});
-                        } else if (message) {
-                            callPromptError(message, "register");
-                        }
-                    });
-                    
+                    if (value === "back") {
+                        $.prompt.goToState("login");
+                    } else if (value === "create") {
+                        socket.emit("create", {
+                            email: form.registerEmail,
+                            username: form.registerUsername,
+                            password: form.registerPassword
+                        }, function (success, message) {
+                            if (success) {
+                                validateUser({
+                                    username: form.registerUsername,
+                                    password: form.registerPassword
+                                });
+                            } else if (message) {
+                                callPromptError(message, "register");
+                            }
+                        });
+                    }
                 }
             },
             "error"     :   {
@@ -105,8 +108,6 @@ function runGame (username) {
                 data[i].x,
                 data[i].y
             );
-            ctx.rect(data[i].x,data[i].y,playerWidth * 3,playerHeight * 3);
-            ctx.stroke();
         }
     });
 }
