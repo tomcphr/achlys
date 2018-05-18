@@ -5,8 +5,20 @@ ctx.textAlign = "center";
 
 var socket = io();
 
-var playerImage = new Image();
-playerImage.src = "/img/player.png";
+var genders = [
+    "M",
+    "F",
+];
+var playerImages = {};
+for (var i = 0; i < genders.length; i++) {
+    var gender = genders[i];
+
+    var image = new Image();
+    image.src = "/img/player_" + gender + ".png";
+    
+    playerImages[gender] = image; 
+}
+
 var playerWidth = 24;
 var playerHeight = 32;
 
@@ -44,7 +56,8 @@ getHtml("/login", function (loginHtml) {
                         socket.emit("create", {
                             email: form.registerEmail,
                             username: form.registerUsername,
-                            password: form.registerPassword
+                            password: form.registerPassword,
+                            gender: form.registerGender
                         }, function (success, message) {
                             if (success) {
                                 validateUser({
@@ -56,12 +69,6 @@ getHtml("/login", function (loginHtml) {
                             }
                         });
                     }
-                }
-            },
-            "error"     :   {
-                buttons: {Ok: "errorOk"},
-                submit: function (event) {
-                    event.preventDefault();
                 }
             },
         };
@@ -79,17 +86,19 @@ function validateUser (form) {
 	    callPromptError("Invalid username or password", "login");
     });
 }
+
 function callPromptError (message, returnState) {
-    $.prompt.goToState("error", true, function () {
-        var currentState = $.prompt.getCurrentState();
-        currentState.find(".jqimessage").html(message);
-        
-        currentState.find(".jqibutton").click(function (event) {
-            $.prompt.goToState(returnState);
+    $.prompt.removeState("error");
+    jQuery.prompt.addState("error", {
+        html: message,
+        buttons: {Ok: "errorOk"},
+        submit: function (event) {
+            event.preventDefault();
             
-            currentState.find(".jqimessage").html("");
-        });
-    });
+            $.prompt.prevState();
+        }
+    }, returnState);
+    $.prompt.goToState("error", true);
 }
 
 function runGame (username) {
@@ -103,6 +112,7 @@ function runGame (username) {
                 ctx.fillText(data[i].id, data[i].x + ((playerWidth * 3) / 2), data[i].y);
             }
             drawPlayer(
+                data[i].gender,
                 data[i].facing,
                 data[i].frame,
                 data[i].x,
@@ -178,7 +188,7 @@ function keyPress (key) {
     }
 }
 
-function drawPlayer (direction, frame, x, y) {
+function drawPlayer (gender, direction, frame, x, y) {
     switch (direction) {
         case "up":
             var imageY = 0;
@@ -198,7 +208,7 @@ function drawPlayer (direction, frame, x, y) {
     }
 
     ctx.drawImage(
-        playerImage,
+        playerImages[gender],
         playerWidth * frame,
         imageY,
         playerWidth,

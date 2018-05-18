@@ -31,6 +31,7 @@ var players = {};
 var Player = function (id) {
     var object = {
         "id"        :   id,
+        "gender"    :   "M",
         "x"         :   Math.random() * (240 - 0) + 0,
         "y"         :   Math.random() * (160 - 0) + 0,
         "keys"      :   {
@@ -42,8 +43,9 @@ var Player = function (id) {
         "facing"    :   "down",
         "walking"   :   false,
         "frame"     :   1,
-        "speed"     :   15,
+        "speed"     :   9,
     };
+
     database.get(id).then(function (doc) {
         for (var key in doc.details) {
             object[key] = doc.details[key];
@@ -73,7 +75,7 @@ var Player = function (id) {
     object.updateFrame = function () {
         if (object.walking) {
             if (object.frame < 2) {
-                object.frame++;
+                object.frame += 0.25;
             } else {
                 object.frame = 0;
             }
@@ -128,7 +130,12 @@ io.sockets.on("connection", function (socket) {
             return;
         }
         
-        createUser(form.email, form.username, form.password, fn);
+        if (!form.gender) {
+            fn(false, "A gender must be selected");
+            return;
+        }
+        
+        createUser(form.email, form.username, form.password, form.gender, fn);
     });
 
     socket.on("runGame", function (name) {
@@ -139,6 +146,7 @@ io.sockets.on("connection", function (socket) {
             var player = players[name];
 
             database.get(name).then(function (doc) {
+                doc.details.gender = player.gender;
                 doc.details.x = player.x;
                 doc.details.y = player.y;
                 doc.details.facing = player.facing;
@@ -169,7 +177,7 @@ io.sockets.on("connection", function (socket) {
     });
 });
 
-function createUser(email, username, password, fn) 
+function createUser(email, username, password, gender, fn) 
 {
     database.get(username).then(function (doc) {
         fn(false, "Username already exists");
@@ -180,6 +188,7 @@ function createUser(email, username, password, fn)
             password: hash,
             email: email,
             details: {
+                gender: gender,
                 x: Math.random() * (240 - 0) + 0,
                 y: Math.random() * (160 - 0) + 0,
                 facing: "down",
@@ -197,8 +206,9 @@ setInterval(function () {
         player.updateFrame();
         positions.push({
             "id"        :   player.id,
+            "gender"    :   player.gender,
             "facing"    :   player.facing,
-            "frame"     :   player.frame,
+            "frame"     :   Math.ceil(player.frame),
             "x"         :   player.x,
             "y"         :   player.y,
         });
@@ -209,4 +219,4 @@ setInterval(function () {
 
         socket.emit("positions", positions);
     }
-}, 1000 / 15);
+}, 1000 / 30);

@@ -10,3 +10,8 @@ canvas {
 .textCenter {
     text-align: center;
 }
+
+.genderHover {
+    width: 48px; 
+    height: 64px; 
+}
