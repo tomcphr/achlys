@@ -1,10 +1,24 @@
-canvas {
+#container {
     border: 1px solid #000;
     padding-left: 0;
     padding-right: 0;
     margin-left: auto;
     margin-right: auto;
     display: block;
+}
+
+canvas {
+    border: 1px solid #000;
+}
+
+#messageText {
+    width: 90%; 
+    height: 30px;
+    margin: 9px;
+}
+
+#sendMessage {
+    width: 6%;
 }
 
 .textCenter {

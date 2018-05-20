@@ -34,6 +34,7 @@ var Player = function (id) {
         "gender"    :   "M",
         "x"         :   Math.random() * (240 - 0) + 0,
         "y"         :   Math.random() * (160 - 0) + 0,
+        "message"   :   "",
         "keys"      :   {
             "left"      :   false,
             "right"     :   false,
@@ -174,6 +175,19 @@ io.sockets.on("connection", function (socket) {
                 player.walking = false;
             }
         });
+
+        var timeout = null;
+        socket.on("message", function (data) {
+            if (timeout) {
+                clearTimeout(timeout);
+            }
+
+            player.message = data;
+
+            timeout = setTimeout(function() {
+                player.message = "";
+            }, 4000);
+        })
     });
 });
 
@@ -199,24 +213,25 @@ function createUser(email, username, password, gender, fn)
 }
 
 setInterval(function () {
-    var positions = [];
+    var details = [];
     for (var i in players) {
         var player = players[i];
         player.updatePosition();
         player.updateFrame();
-        positions.push({
+        details.push({
             "id"        :   player.id,
             "gender"    :   player.gender,
             "facing"    :   player.facing,
             "frame"     :   Math.ceil(player.frame),
             "x"         :   player.x,
             "y"         :   player.y,
+            "message"   :   player.message,
         });
     }
 
     for (var i in sockets) {
         var socket = sockets[i];
 
-        socket.emit("positions", positions);
+        socket.emit("details", details);
     }
 }, 1000 / 30);

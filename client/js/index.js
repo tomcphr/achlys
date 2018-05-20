@@ -104,12 +104,11 @@ function callPromptError (message, returnState) {
 function runGame (username) {
     socket.emit("runGame", username);
     
-    socket.on("positions", function (data) {
+    socket.on("details", function (data) {
         ctx.clearRect(0, 0, $("#ctx").attr("width"), $("#ctx").attr("height"));
         for (var i = 0; i < data.length; i++) {
-            // Don't show the players own username above their character
-            if (data[i].id !== username) {
-                ctx.fillText(data[i].id, data[i].x + ((playerWidth * 3) / 2), data[i].y);
+            if (data[i].message) {
+                ctx.fillText(data[i].message, data[i].x + ((playerWidth * 3) / 2), data[i].y);
             }
             drawPlayer(
                 data[i].gender,
@@ -149,7 +148,22 @@ function getHtml(url, callback) {
 	xhr.send();
 };
 
-document.onkeydown = function (event) {
+$("#messageText").on("keyup", function (event) {
+    event.preventDefault();
+    if (event.keyCode === 13) {
+        $("#sendMessage").click();
+    }
+});
+
+$("#sendMessage").click(function () {
+    var message = $("#messageText").val();
+    
+    socket.emit("message", message);  
+    
+    $("#messageText").val("");
+});
+
+canvas.onkeydown = function (event) {
     var type = keyPress(event.keyCode);
     socket.emit("keyPress", {
         "type"  :   type,
@@ -157,7 +171,7 @@ document.onkeydown = function (event) {
     });
 }
 
-document.onkeyup = function (event) {
+canvas.onkeyup = function (event) {
     var type = keyPress(event.keyCode);
     socket.emit("keyPress", {
         "type"  :   type,
