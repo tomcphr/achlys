@@ -1,5 +1,5 @@
 # Deko
-A online role playing game written in JavaScript taking advantage of socket.io.
+An online role playing game written in JavaScript taking advantage of socket.io.
 
 ## To do
 * Scrollable camera
