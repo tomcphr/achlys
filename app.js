@@ -97,14 +97,16 @@ io.sockets.on("connection", function (socket) {
     sockets[session] = socket;
     
     socket.on("validate", function (form, fn) {
-        var player = new Player(form.username);
+        var username = form.username.toLowerCase();
+        
+        var player = new Player(username);
 
         // Ensure that the user isn't already logged in
-        if (players.hasOwnProperty(form.username)) {
+        if (players.hasOwnProperty(username)) {
             fn(false);
             return;
         } else {
-            users.get(form.username).then(function (doc) {
+            users.get(username).then(function (doc) {
                 if (bcrypt.compareSync(form.password, doc.password)) {
                     fn(true);
                     return;
@@ -122,7 +124,8 @@ io.sockets.on("connection", function (socket) {
             return;
         }
         
-        if (!form.username) {
+        var username = form.username.toLowerCase();
+        if (!username) {
             fn(false, "Username cannot be blank");
             return;
         }
@@ -137,7 +140,7 @@ io.sockets.on("connection", function (socket) {
             return;
         }
         
-        createUser(form.email, form.username, form.password, form.gender, fn);
+        createUser(form.email, username, form.password, form.gender, fn);
     });
 
     socket.on("runGame", function (name) {
