@@ -23,7 +23,8 @@ var port = 8080;
 host.listen(port);
 console.log("Listening on Port '" + port + "'");
 
-var database = new PouchDB("database");
+var users = new PouchDB("users");
+var messages = new PouchDB("messages");
 
 var sockets = {};
 var players = {};
@@ -47,7 +48,7 @@ var Player = function (id) {
         "speed"     :   9,
     };
 
-    database.get(id).then(function (doc) {
+    users.get(id).then(function (doc) {
         for (var key in doc.details) {
             object[key] = doc.details[key];
         }
@@ -103,7 +104,7 @@ io.sockets.on("connection", function (socket) {
             fn(false);
             return;
         } else {
-            database.get(form.username).then(function (doc) {
+            users.get(form.username).then(function (doc) {
                 if (bcrypt.compareSync(form.password, doc.password)) {
                     fn(true);
                     return;
@@ -146,12 +147,12 @@ io.sockets.on("connection", function (socket) {
         socket.on("disconnect", function () {
             var player = players[name];
 
-            database.get(name).then(function (doc) {
+            users.get(name).then(function (doc) {
                 doc.details.gender = player.gender;
                 doc.details.x = player.x;
                 doc.details.y = player.y;
                 doc.details.facing = player.facing;
-                return database.put(doc);
+                return users.put(doc);
             });
 
             delete sockets[session];
@@ -188,7 +189,7 @@ io.sockets.on("connection", function (socket) {
             }
 
             player.message = data;
-
+        
             timeout = setTimeout(function() {
                 player.message = "";
             }, 4000);
@@ -198,11 +199,11 @@ io.sockets.on("connection", function (socket) {
 
 function createUser(email, username, password, gender, fn) 
 {
-    database.get(username).then(function (doc) {
+    users.get(username).then(function (doc) {
         fn(false, "Username already exists");
     }).catch(function () {
         var hash = bcrypt.hashSync(password, 10);
-        database.put({
+        users.put({
             _id: username,
             password: hash,
             email: email,

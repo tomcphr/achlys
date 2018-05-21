@@ -15,6 +15,7 @@ canvas {
     width: 90%; 
     height: 30px;
     margin: 9px;
+    padding: 5px;
 }
 
 #sendMessage {
