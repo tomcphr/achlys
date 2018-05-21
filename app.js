@@ -32,6 +32,7 @@ var players = {};
 var Player = function (id) {
     var object = {
         "id"        :   id,
+        "hp"        :   100,
         "gender"    :   "M",
         "x"         :   Math.random() * (240 - 0) + 0,
         "y"         :   Math.random() * (160 - 0) + 0,
@@ -53,7 +54,7 @@ var Player = function (id) {
             object[key] = doc.details[key];
         }
     }).catch(function () {});
-
+    
     object.resetFacing = function () {
         for (var property in object.keys) {
             if (object.keys.hasOwnProperty(property)) {
@@ -229,6 +230,7 @@ setInterval(function () {
         player.updateFrame();
         details.push({
             "id"        :   player.id,
+            "hp"        :   player.hp,
             "gender"    :   player.gender,
             "facing"    :   player.facing,
             "frame"     :   Math.ceil(player.frame),

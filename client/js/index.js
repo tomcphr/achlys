@@ -107,9 +107,28 @@ function runGame (username) {
     socket.on("details", function (data) {
         ctx.clearRect(0, 0, $("#ctx").attr("width"), $("#ctx").attr("height"));
         for (var i = 0; i < data.length; i++) {
-            if (data[i].message) {
-                ctx.fillText(data[i].message, data[i].x + ((playerWidth * 3) / 2), data[i].y);
+            var playerCenterX = data[i].x + ((playerWidth * 3) / 2);
+            
+            var currentY = data[i].y - 10;
+            if (data[i].hp) {
+                var barWidth = (data[i].hp / 100) * 50;
+                var barX = playerCenterX - (barWidth / 2);
+                var barHeight = 7;
+                
+                ctx.fillStyle = "#000000";
+                ctx.fillRect(barX - 1, currentY - 1, barWidth + 2, barHeight + 2);
+                
+                ctx.fillStyle = "#FF0000";
+                ctx.fillRect(barX, currentY, barWidth, barHeight);
+                
+                currentY -= 15;
             }
+            
+            if (data[i].message) {
+                ctx.fillStyle = "#000000";
+                ctx.fillText(data[i].message, playerCenterX, currentY);
+            }
+
             drawPlayer(
                 data[i].gender,
                 data[i].facing,
