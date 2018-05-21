@@ -179,6 +179,10 @@ canvas.onkeyup = function (event) {
     });
 }
 
+$("#ctx").focusout(function () {
+    socket.emit("nofocus");
+});
+
 function keyPress (key) {
     switch (key) {
         case 68:

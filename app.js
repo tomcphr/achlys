@@ -157,6 +157,11 @@ io.sockets.on("connection", function (socket) {
             delete sockets[session];
             delete players[name];
         });
+        
+        socket.on("nofocus", function (data) {
+            player.resetFacing();
+            player.walking = false;
+        });
 
         socket.on("keyPress", function (data) {
             var type = data.type;
