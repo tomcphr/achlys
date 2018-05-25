@@ -154,7 +154,6 @@ module Deko {
         error (message, createPrompt: boolean = false)
         {
             var prompt = {
-                html: message,
                 buttons: {Ok: "ok"},
                 submit: function (event) {
                     event.preventDefault();
@@ -167,8 +166,9 @@ module Deko {
                 }
             };
             if (createPrompt) {
-                $.prompt(prompt);
+                $.prompt(message, prompt);
             } else {
+                prompt.html = message;
                 $.prompt.removeState("error");
                 $.prompt.addState("error", prompt);
                 $.prompt.goToState("error", true);
