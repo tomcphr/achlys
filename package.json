@@ -12,7 +12,8 @@
     "express": "^4.16.3",
     "pouchdb": "^6.4.3",
     "socket.io": "^2.1.0",
-    "typescript": "^2.8.3"
+    "typescript": "^2.8.3",
+    "webpack": "^4.9.1"
   },
   "scripts": {
     "compile": "tsc --outFile client/js/index.js client/src/Main.ts"
@@ -26,5 +27,9 @@
   "bugs": {
     "url": "https://github.com/tomcphr/deko/issues"
   },
-  "homepage": "https://github.com/tomcphr/deko#readme"
+  "homepage": "https://github.com/tomcphr/deko#readme",
+  "devDependencies": {
+    "ts-loader": "^4.3.0",
+    "typescript": "^2.8.3"
+  }
 }
