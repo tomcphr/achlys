@@ -16,7 +16,8 @@
     "webpack": "^4.9.1"
   },
   "scripts": {
-    "compile": "tsc --outFile client/js/index.js client/src/Main.ts"
+    "compile": "./node_modules/.bin/webpack --config webpack.config.js",
+    "watch": "./node_modules/.bin/webpack --config webpack.config.js --watch"
   },
   "repository": {
     "type": "git",
@@ -30,6 +31,7 @@
   "homepage": "https://github.com/tomcphr/deko#readme",
   "devDependencies": {
     "ts-loader": "^4.3.0",
-    "typescript": "^2.8.3"
+    "typescript": "^2.8.3",
+    "webpack-cli": "^2.1.4"
   }
 }

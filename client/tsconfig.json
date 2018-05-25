@@ -5,6 +5,9 @@
         "noImplicitAny": false,
         "strictNullChecks": false,
         "esModuleInterop": true,
-        "lib": ["ES6"]
+        "lib": [
+            "es6",
+            "dom"
+        ]
     }
 }
