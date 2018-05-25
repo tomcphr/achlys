@@ -4,14 +4,18 @@
   "description": "",
   "main": "app.js",
   "dependencies": {
+    "@types/jquery": "^3.3.2",
+    "@types/node": "9.6.7",
+    "@types/socket.io": "^1.4.33",
+    "@types/socket.io-client": "^1.4.32",
     "bcrypt": "^2.0.1",
     "express": "^4.16.3",
     "pouchdb": "^6.4.3",
-    "socket.io": "^2.1.0"
+    "socket.io": "^2.1.0",
+    "typescript": "^2.8.3"
   },
-  "devDependencies": {},
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "compile": "tsc --outFile client/js/index.js client/src/Main.ts"
   },
   "repository": {
     "type": "git",

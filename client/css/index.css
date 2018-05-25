@@ -1,18 +1,25 @@
 #container {
     border: 1px solid #000;
-    padding-left: 0;
-    padding-right: 0;
+    display: block;
     margin-left: auto;
     margin-right: auto;
-    display: block;
+    padding-left: 0;
+    padding-right: 0;
+    width: 960px;
 }
 
-canvas {
+#ctx, #loginForm {
     border-bottom: 1px solid #000;
+}
+#loginForm {
+    padding: 7px;
+}
+#signupButton {
+    float: right;
 }
 
 #messageText {
-    width: 90%; 
+    width: 90%;
     height: 30px;
     margin: 9px;
     padding: 5px;
@@ -27,6 +34,9 @@ canvas {
 }
 
 .genderHover {
-    width: 48px; 
-    height: 64px; 
+    width: 48px;
+    height: 64px;
+}
+.hidden {
+    display: none;
 }

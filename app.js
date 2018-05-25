@@ -24,7 +24,6 @@ host.listen(port);
 console.log("Listening on Port '" + port + "'");
 
 var users = new PouchDB("users");
-var messages = new PouchDB("messages");
 
 var sockets = {};
 var players = {};
@@ -144,7 +143,7 @@ io.sockets.on("connection", function (socket) {
         createUser(form.email, username, form.password, form.gender, fn);
     });
 
-    socket.on("runGame", function (name) {
+    socket.on("login", function (name) {
         var player = new Player(name);
         players[name] = player;
 
