@@ -168,7 +168,7 @@ module Deko {
             if (createPrompt) {
                 $.prompt(message, prompt);
             } else {
-                prompt.html = message;
+                prompt["html"] = message;
                 $.prompt.removeState("error");
                 $.prompt.addState("error", prompt);
                 $.prompt.goToState("error", true);
