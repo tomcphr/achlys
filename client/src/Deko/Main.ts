@@ -39,11 +39,11 @@ module Deko {
                 for (var i = 0; i < data.length; i++) {
                     var x = data[i].x;
                     var y = data[i].y;
-                    var gender = data[i].gender;
+                    var avatar = data[i].avatar;
                     var facing = data[i].facing;
                     var frame = data[i].frame;
 
-                    player.draw(x, y, gender, facing, frame);
+                    player.draw(x, y, avatar, facing, frame);
 
                     var hp = data[i].hp;
                     var message = data[i].message;
@@ -127,20 +127,26 @@ module Deko {
                     return;
                 }
 
+                /**
+                 * Logout any players that are associated with the current socket.
+                 * I.e don't allow the player to log into two accounts on the same window.
+                 */
+                socket.emit("logout");
+
                 var game = new Deko.Main(socket);
                 game.start(username);
             });
 
         }
 
-        register (email: string, username: string, password: string, gender: string)
+        register (email: string, username: string, password: string, avatar: string)
         {
             var self = this;
             this.socket.emit("create", {
                 "email": email,
                 "username": username,
                 "password": password,
-                "gender": gender
+                "avatar": avatar
             }, function (success, message) {
                 if (success) {
                     self.login(username, password);
@@ -187,21 +193,21 @@ module Deko {
         {
             this.ctx = ctx;
 
-            var genders = [
+            var avatars = [
                 "M",
                 "F",
             ];
-            for (var i = 0; i < genders.length; i++) {
-                var gender = genders[i];
+            for (var i = 0; i < avatars.length; i++) {
+                var avatar = avatars[i];
 
                 var image = new Image();
-                image.src = "/img/player_" + gender + ".png";
+                image.src = "/img/player_" + avatar + ".png";
 
-                this.images[gender] = image;
+                this.images[avatar] = image;
             }
         }
 
-        draw (x: number, y: number, gender: string, facing: string, frame: number)
+        draw (x: number, y: number, avatar: string, facing: string, frame: number)
         {
             switch (facing) {
                 case "up":
@@ -222,7 +228,7 @@ module Deko {
             }
 
             this.ctx.drawImage(
-                this.images[gender],
+                this.images[avatar],
                 this.width * frame,
                 imageY,
                 this.width,
@@ -276,7 +282,7 @@ window.onload = () => {
         user.login(username, password);
     });
 
-    $("#signupButton").click(function () {
+    $("#registerButton").click(function () {
         var html = $("#registerForm").html();
 
         $.prompt(html, {
@@ -289,7 +295,7 @@ window.onload = () => {
                     form.registerEmail,
                     form.registerUsername,
                     form.registerPassword,
-                    form.registerGender
+                    form.registerAvatar
                 );
             }
         })

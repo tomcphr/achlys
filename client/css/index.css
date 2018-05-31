@@ -14,7 +14,7 @@
 #loginForm {
     padding: 7px;
 }
-#signupButton {
+#registerButton {
     float: right;
 }
 
@@ -33,7 +33,7 @@
     text-align: center;
 }
 
-.genderHover {
+.avatarHover {
     width: 48px;
     height: 64px;
 }

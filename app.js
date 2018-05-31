@@ -32,7 +32,7 @@ var Player = function (id) {
     var object = {
         "id"        :   id,
         "hp"        :   100,
-        "gender"    :   "M",
+        "avatar"    :   "M",
         "x"         :   Math.random() * (240 - 0) + 0,
         "y"         :   Math.random() * (160 - 0) + 0,
         "message"   :   "",
@@ -53,7 +53,7 @@ var Player = function (id) {
             object[key] = doc.details[key];
         }
     }).catch(function () {});
-    
+
     object.resetFacing = function () {
         for (var property in object.keys) {
             if (object.keys.hasOwnProperty(property)) {
@@ -95,10 +95,10 @@ io.sockets.on("connection", function (socket) {
     socket.id = session;
 
     sockets[session] = socket;
-    
+
     socket.on("validate", function (form, fn) {
         var username = form.username.toLowerCase();
-        
+
         var player = new Player(username);
 
         // Ensure that the user isn't already logged in
@@ -117,51 +117,46 @@ io.sockets.on("connection", function (socket) {
             });
         }
     });
-    
+
     socket.on("create", function (form, fn) {
         if (!form.email) {
             fn(false, "Email address cannot be blank");
             return;
         }
-        
+
         var username = form.username.toLowerCase();
         if (!username) {
             fn(false, "Username cannot be blank");
             return;
         }
-        
+
         if (!form.password) {
             fn(false, "Password cannot be blank");
             return;
         }
-        
-        if (!form.gender) {
-            fn(false, "A gender must be selected");
+
+        if (!form.avatar) {
+            fn(false, "A avatar must be selected");
             return;
         }
-        
-        createUser(form.email, username, form.password, form.gender, fn);
+
+        createUser(form.email, username, form.password, form.avatar, fn);
     });
 
     socket.on("login", function (name) {
         var player = new Player(name);
         players[name] = player;
 
-        socket.on("disconnect", function () {
-            var player = players[name];
+        socket.on("logout", function () {
+            logoutUser(name);
+        });
 
-            users.get(name).then(function (doc) {
-                doc.details.gender = player.gender;
-                doc.details.x = player.x;
-                doc.details.y = player.y;
-                doc.details.facing = player.facing;
-                return users.put(doc);
-            });
+        socket.on("disconnect", function () {
+            logoutUser(name);
 
             delete sockets[session];
-            delete players[name];
         });
-        
+
         socket.on("nofocus", function (data) {
             player.resetFacing();
             player.walking = false;
@@ -192,7 +187,7 @@ io.sockets.on("connection", function (socket) {
             }
 
             player.message = data;
-        
+
             timeout = setTimeout(function() {
                 player.message = "";
             }, 4000);
@@ -200,7 +195,7 @@ io.sockets.on("connection", function (socket) {
     });
 });
 
-function createUser(email, username, password, gender, fn) 
+function createUser(email, username, password, avatar, fn)
 {
     users.get(username).then(function (doc) {
         fn(false, "Username already exists");
@@ -211,7 +206,7 @@ function createUser(email, username, password, gender, fn)
             password: hash,
             email: email,
             details: {
-                gender: gender,
+                avatar: avatar,
                 x: Math.random() * (240 - 0) + 0,
                 y: Math.random() * (160 - 0) + 0,
                 facing: "down",
@@ -219,6 +214,21 @@ function createUser(email, username, password, gender, fn)
         });
         fn(true);
     });
+}
+
+function logoutUser(username)
+{
+    var player = players[username];
+
+    users.get(username).then(function (doc) {
+        doc.details.avatar = player.avatar;
+        doc.details.x = player.x;
+        doc.details.y = player.y;
+        doc.details.facing = player.facing;
+        return users.put(doc);
+    });
+
+    delete players[username];
 }
 
 setInterval(function () {
@@ -230,7 +240,7 @@ setInterval(function () {
         details.push({
             "id"        :   player.id,
             "hp"        :   player.hp,
-            "gender"    :   player.gender,
+            "avatar"    :   player.avatar,
             "facing"    :   player.facing,
             "frame"     :   Math.ceil(player.frame),
             "x"         :   player.x,
