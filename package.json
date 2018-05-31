@@ -13,7 +13,10 @@
     "pouchdb": "^6.4.3",
     "socket.io": "^2.1.0",
     "typescript": "^2.8.3",
-    "webpack": "^4.9.1"
+    "webpack": "^4.9.1",
+    "ts-loader": "^4.3.0",
+    "typescript": "^2.8.3",
+    "webpack-cli": "^2.1.4"
   },
   "scripts": {
     "compile": "./node_modules/.bin/webpack --config webpack.config.js",
@@ -28,10 +31,5 @@
   "bugs": {
     "url": "https://github.com/tomcphr/deko/issues"
   },
-  "homepage": "https://github.com/tomcphr/deko#readme",
-  "devDependencies": {
-    "ts-loader": "^4.3.0",
-    "typescript": "^2.8.3",
-    "webpack-cli": "^2.1.4"
-  }
+  "homepage": "https://github.com/tomcphr/deko#readme"
 }
