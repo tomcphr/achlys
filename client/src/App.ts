@@ -7,4 +7,9 @@ declare var require: {
     ) => void;
 };
 
+// Allow the user of the JQuery impromptu plugin
+interface JQueryStatic {
+    prompt: any;
+}
+
 require("./Deko/Main");

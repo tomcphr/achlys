@@ -1,8 +1,3 @@
-// Allow the user of the JQuery impromptu plugin
-interface JQueryStatic {
-    prompt: any;
-}
-
 module Deko {
     export class Main
     {
