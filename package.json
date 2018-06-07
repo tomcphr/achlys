@@ -10,12 +10,11 @@
     "@types/socket.io-client": "^1.4.32",
     "bcrypt": "^2.0.1",
     "express": "^4.16.3",
-    "pouchdb": "^6.4.3",
+    "node-mysql-helper": "^0.6.7",
     "socket.io": "^2.1.0",
-    "typescript": "^2.8.3",
-    "webpack": "^4.9.1",
     "ts-loader": "^4.3.0",
     "typescript": "^2.8.3",
+    "webpack": "^4.9.1",
     "webpack-cli": "^2.1.4"
   },
   "scripts": {

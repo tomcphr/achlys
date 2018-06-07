@@ -1,7 +1,7 @@
 var express = require("express");
 var app = express();
 var host = require("http").Server(app);
-var PouchDB = require("pouchdb");
+var mysql = require("node-mysql-helper");
 var bcrypt = require("bcrypt");
 
 app.get("/", function (req, res) {
@@ -19,11 +19,16 @@ app.get("/register", function (req, res) {
     res.sendFile(__dirname + "/client/register.html");
 });
 
+mysql.connect({
+    host: "mysql.cf0ltiuy5g4n.eu-west-1.rds.amazonaws.com",
+    user: "root",
+    password: "r7ttdqAU1JrS714UOr0u",
+    database: "deko"
+});
+
 var port = 8080;
 host.listen(port);
 console.log("Listening on Port '" + port + "'");
-
-var users = new PouchDB("users");
 
 var sockets = {};
 var players = {};
@@ -48,11 +53,20 @@ var Player = function (id) {
         "speed"     :   9,
     };
 
-    users.get(id).then(function (doc) {
-        for (var key in doc.details) {
-            object[key] = doc.details[key];
+    mysql.record("users", {"username": id}).then(function (record) {
+        if (record) {
+            object.avatar = record.avatar;
+            object.hp = record.health;
         }
-    }).catch(function () {});
+    });
+
+    mysql.record("positions", {"username": id}).then(function (record) {
+        if (record) {
+            object.x = record.x;
+            object.y = record.y;
+            object.facing = record.facing;
+        }
+    });
 
     object.resetFacing = function () {
         for (var property in object.keys) {
@@ -106,13 +120,13 @@ io.sockets.on("connection", function (socket) {
             fn(false);
             return;
         } else {
-            users.get(username).then(function (doc) {
-                if (bcrypt.compareSync(form.password, doc.password)) {
+            mysql.record("users", {"username": username}).then(function (record) {
+                if (bcrypt.compareSync(form.password, record.password)) {
                     fn(true);
                     return;
                 }
                 fn(false);
-            }).catch(function () {
+            }).catch (function () {
                 fn(false);
             });
         }
@@ -186,6 +200,12 @@ io.sockets.on("connection", function (socket) {
                 clearTimeout(timeout);
             }
 
+            mysql.insert("messagelog", {
+                "username"  :   name,
+                "message"   :   data,
+                "date"      :   Math.floor(Date.now() / 1000)
+            });
+
             player.message = data;
 
             timeout = setTimeout(function() {
@@ -197,22 +217,38 @@ io.sockets.on("connection", function (socket) {
 
 function createUser(email, username, password, avatar, fn)
 {
-    users.get(username).then(function (doc) {
+    mysql.record("users", {"username": username}).then(function (record) {
+        if (!record) {
+            var hash = bcrypt.hashSync(password, 10);
+            mysql.insert("users", {
+                "username"  :   username,
+                "password"  :   hash,
+                "email"     :   email,
+                "avatar"    :   avatar,
+                "health"    :   100
+            }).then(function(info){
+                mysql.insert("positions", {
+                    "username"  :   username,
+                    "x"         :   Math.random() * (240 - 0) + 0,
+                    "y"         :   Math.random() * (160 - 0) + 0,
+                    "facing"    :   "down"
+                }).catch(function (error) {
+                    mysql.delete("users", {"username": username});
+
+                    fn(false, error.message);
+                })
+
+                fn(true);
+            }).catch(function (error) {
+                fn(false, error.message);
+            });
+
+            return;
+        }
+
         fn(false, "Username already exists");
-    }).catch(function () {
-        var hash = bcrypt.hashSync(password, 10);
-        users.put({
-            _id: username,
-            password: hash,
-            email: email,
-            details: {
-                avatar: avatar,
-                x: Math.random() * (240 - 0) + 0,
-                y: Math.random() * (160 - 0) + 0,
-                facing: "down",
-            }
-        });
-        fn(true);
+    }).catch(function (error) {
+        fn(false, "Something went wrong: " + error.message);
     });
 }
 
@@ -220,12 +256,14 @@ function logoutUser(username)
 {
     var player = players[username];
 
-    users.get(username).then(function (doc) {
-        doc.details.avatar = player.avatar;
-        doc.details.x = player.x;
-        doc.details.y = player.y;
-        doc.details.facing = player.facing;
-        return users.put(doc);
+    mysql.update("users", {"username": username}, {
+        "health"    :   player.hp
+    });
+
+    mysql.update("positions", {"username": username}, {
+        "x"         :   player.x,
+        "y"         :   player.y,
+        "facing"    :   player.facing
     });
 
     delete players[username];
