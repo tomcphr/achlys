@@ -18,15 +18,29 @@
     float: right;
 }
 
-#messageText {
-    width: 90%;
-    height: 30px;
-    margin: 9px;
-    padding: 5px;
+#messageContainer {
+    height: 55px;
 }
-
+#messageText {
+    float: left;
+    height: 50%;
+    margin-bottom: 1%;
+    margin-left: 1%;
+    margin-top: 1%;
+    padding: 1px;
+    width: 88%;
+}
+#sendContainer {
+    float: right;
+    height: 50%;
+    margin-bottom: 1%;
+    margin-top: 1%;
+    padding: 1px;
+    text-align: center;
+    width: 10%;
+}
 #sendMessage {
-    width: 6%;
+    width: 50%;
 }
 
 .textCenter {
