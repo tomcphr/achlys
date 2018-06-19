@@ -1,34 +1,99 @@
-#container {
+#gameContainer {
     border: 1px solid #000;
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    padding-left: 0;
-    padding-right: 0;
+    position: absolute;
+    margin: 0;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     width: 960px;
+    height: 600px;
 }
 
-#ctx, #loginForm {
-    border-bottom: 1px solid #000;
+#ctx {
+    z-index: 0;
+    position: absolute;
 }
-#loginForm {
-    padding: 7px;
+#interface {
+    z-index: 1;
+    position: absolute;
+    width: 100%;
+    height: 100%;
 }
-#registerButton {
+
+#uiOverlay {
+    width: 100%;
+    height: 100%;
+}
+
+#loginDialog .ui-dialog-titlebar-close {
+    display: none;
+}
+
+.dialogHtml {
+    margin-top: 10px;
+}
+
+.hidden {
+    display: none;
+}
+
+.positionCenter {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.textCenter {
+    text-align: center;
+}
+
+.fullWidth {
+    width: 100%;
+}
+
+.fLeft {
+    float: left;
+}
+.fRight {
     float: right;
 }
 
+#userName {
+    margin-left: 10px;
+    margin-top: 5px;
+    display: inline-block;
+}
+
 #messageContainer {
-    height: 55px;
+    position: fixed;
+    left: 0%;
+    bottom: 0%;
+    transform: translate(2.5%, -5%);
+    margin: 0 auto;
+    width: 40%;
+    border: 1px solid #000;
+    background: #fff;
+}
+#messageHistory {
+    width: 100%;
+    height: 100px;
+    border-bottom: 1px solid #000;
+    overflow-y: scroll;
+}
+.historicMessage {
+    padding-left: 7px;
+    padding-top: 3px;
 }
 #messageText {
     float: left;
+    border: 1px solid #000;
     height: 50%;
     margin-bottom: 1%;
-    margin-left: 1%;
+    margin-left: 2%;
     margin-top: 1%;
     padding: 1px;
-    width: 88%;
+    width: 80%;
 }
 #sendContainer {
     float: right;
@@ -37,20 +102,5 @@
     margin-top: 1%;
     padding: 1px;
     text-align: center;
-    width: 10%;
-}
-#sendMessage {
-    width: 50%;
-}
-
-.textCenter {
-    text-align: center;
-}
-
-.avatarHover {
-    width: 48px;
-    height: 64px;
-}
-.hidden {
-    display: none;
+    width: 15%;
 }

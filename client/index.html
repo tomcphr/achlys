@@ -1,61 +1,91 @@
 <!DOCTYPE html>
 <head>
     <script
-      src='https://code.jquery.com/jquery-3.3.1.min.js'
-      integrity='sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8='
-      crossorigin='anonymous'></script>
+        src='https://code.jquery.com/jquery-3.3.1.min.js'
+        integrity='sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8='
+        crossorigin='anonymous'></script>
+    <script
+        src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
+        integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
+        crossorigin="anonymous"></script>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery-impromptu/6.2.3/jquery-impromptu.min.js'></script>
+    <link rel='stylesheet' type='text/css' href='https://code.jquery.com/ui/1.12.1/themes/black-tie/jquery-ui.css'>
     <link rel='stylesheet' type='text/css' href='https://cdnjs.cloudflare.com/ajax/libs/jquery-impromptu/6.2.3/jquery-impromptu.min.css'>
     <link rel='stylesheet' type='text/css' href='css/index.css'>
     <script src='https://cdn.socket.io/socket.io-1.4.5.js'></script>
     <script src='js/index.js'></script>
 </head>
 <body>
-    <div id='container'>
-      <div id='loginForm'>
-        Username: <input type='text' id='loginUsername'>
-        Password: <input type='password' id='loginPassword'>
-        <button id='loginButton'>Login</button>
-        <button id='registerButton'>Register</button>
-      </div>
-      <canvas id='ctx' width='960' height='600' tabindex='1'></canvas>
-      <div id='messageContainer'>
-        <input type='text' name='message' id='messageText'>
-        <span id='sendContainer'>
-            <button id='sendMessage'>Send</button>
-        </span>
-      </div>
-    </div>
-    <div id='registerForm' class='hidden'>
-        <div class='textCenter'>
-            <label>
-                Email: <br>
-                <input type='text' class='textCenter' name='registerEmail'>
-            </label>
-            <br>
-            <label>
-                Username: <br>
-                <input type='text' class='textCenter' name='registerUsername'>
-            </label>
-            <br>
-            <label>
-                Password: <br>
-                <input type='password' class='textCenter' name='registerPassword'>
-            </label>
-            <br>
-            <label>
-                Avatar: <br>
-                <div style='display: inline-block;'>
-                    <img class='textCenter avatarHover' src='/img/register/M.png'></img>
+    <div id='gameContainer'>
+        <div id='interface'>
+            <div id='loginDialog'>
+                <div
+                    id='html_login'
+                    class='hidden dialogHtml'
+                >
+                    <div class='textCenter fullWidth'>
+                        <label for='loginUsername'>Username:</label>
+                        <br>
+                        <input type='text' class='textCenter' id='loginUsername'>
+                    </div>
                     <br>
-                    <input class='textCenter' type='radio' name='registerAvatar' value='M' checked>
-                </div>
-                <div style='display: inline-block;'>
-                    <img class='textCenter avatarHover' src='/img/register/F.png'></img>
+                    <div class='textCenter fullWidth'>
+                        <label for='loginPassword'>Password:</label>
+                        <br>
+                        <input type='password' class='textCenter' id='loginPassword'>
+                    </div>
                     <br>
-                    <input class='textCenter' type='radio' name='registerAvatar' value='F'>
                 </div>
-            </label>
+                <div
+                    id='html_register'
+                    class='hidden dialogHtml'
+                >
+                    <div class='textCenter fullWidth'>
+                        <label for='registerEmail'>Email:</label>
+                        <br>
+                        <input type='text' class='textCenter' id='registerEmail'>
+                    </div>
+                    <br>
+                    <div class='textCenter fullWidth'>
+                        <label for='registerUsername'>Username:</label>
+                        <br>
+                        <input type='text' class='textCenter' id='registerUsername'>
+                    </div>
+                    <br>
+                    <div class='textCenter fullWidth'>
+                        <label for='registerPassword'>Password:</label>
+                        <br>
+                        <input type='password' class='textCenter' id='registerPassword'>
+                    </div>
+                    <br>
+                    <div class='textCenter fullWidth'>
+                        Avatar: <br>
+                        <div style='display: inline-block;'>
+                            <img class='textCenter avatarHover' src='/img/register/M.png'></img>
+                            <br>
+                            <input class='textCenter registerAvatar' name='registerAvatar' type='radio' value='M' checked>
+                        </div>
+                        <div style='display: inline-block;'>
+                            <img class='textCenter avatarHover' src='/img/register/F.png'></img>
+                            <br>
+                            <input class='textCenter registerAvatar' name='registerAvatar' type='radio' value='F'>
+                        </div>
+                    </div>
+                    <br>
+                </div>
+            </div>
+            <div id='uiOverlay' class='hidden'>
+                <div id='userName'></div>
+                <button id='logoutButton' class='fRight'>Logout</button>
+                <div id='messageContainer'>
+                    <div id='messageHistory'></div>
+                    <input type='text' name='message' id='messageText'>
+                    <span id='sendContainer'>
+                        <button id='sendMessage'>Send</button>
+                    </span>
+                </div>
+            </div>
         </div>
+        <canvas id='ctx' width='960' height='600'></canvas>
     </div>
 </body>

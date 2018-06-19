@@ -40,7 +40,11 @@ var Player = function (id) {
         "avatar"    :   "M",
         "x"         :   Math.random() * (240 - 0) + 0,
         "y"         :   Math.random() * (160 - 0) + 0,
-        "message"   :   "",
+        "message"   :   {
+            "id"        :   id + "_" + Math.round((new Date()).getTime() / 1000),
+            "text"      :   "",
+        },
+        "timeout"   :   null,
         "keys"      :   {
             "left"      :   false,
             "right"     :   false,
@@ -74,7 +78,7 @@ var Player = function (id) {
                 object.keys[property] = false;
             }
         }
-    }
+    };
 
     object.updatePosition = function () {
         if (object.keys.right) {
@@ -86,7 +90,7 @@ var Player = function (id) {
         } else if (object.keys.down) {
             object.y += object.speed;
         }
-    }
+    };
 
     object.updateFrame = function () {
         if (object.walking) {
@@ -98,22 +102,20 @@ var Player = function (id) {
         } else {
             object.frame = 1;
         }
-    }
+    };
 
     return object;
-}
+};
 
 var io = require("socket.io")(host, {});
 io.sockets.on("connection", function (socket) {
     var session = Math.random();
     socket.id = session;
+    socket.game = {};
 
-    sockets[session] = socket;
-
+    // Listen out for the user validation.
     socket.on("validate", function (form, fn) {
         var username = form.username.toLowerCase();
-
-        var player = new Player(username);
 
         // Ensure that the user isn't already logged in
         if (players.hasOwnProperty(username)) {
@@ -154,128 +156,155 @@ io.sockets.on("connection", function (socket) {
             return;
         }
 
-        createUser(form.email, username, form.password, form.avatar, fn);
-    });
+        mysql.record("users", {"username": form.username}).then(function (record) {
+            if (!record) {
+                var hash = bcrypt.hashSync(form.password, 10);
+                mysql.insert("users", {
+                    "username"  :   form.username,
+                    "password"  :   hash,
+                    "email"     :   form.email,
+                    "avatar"    :   form.avatar,
+                    "health"    :   100
+                }).then(function (info){
+                    mysql.insert("positions", {
+                        "username"  :   form.username,
+                        "x"         :   Math.random() * (240 - 0) + 0,
+                        "y"         :   Math.random() * (160 - 0) + 0,
+                        "facing"    :   "down"
+                    }).catch(function (error) {
+                        mysql.delete("users", {"username": form.username});
 
-    socket.on("login", function (name) {
-        var player = new Player(name);
-        players[name] = player;
+                        fn(false, error.message);
+                    });
 
-        socket.on("logout", function () {
-            logoutUser(name);
-        });
+                    fn(true);
+                }).catch(function (error) {
+                    fn(false, error.message);
+                });
 
-        socket.on("disconnect", function () {
-            logoutUser(name);
-
-            delete sockets[session];
-        });
-
-        socket.on("nofocus", function (data) {
-            player.resetFacing();
-            player.walking = false;
-        });
-
-        socket.on("keyPress", function (data) {
-            var type = data.type;
-            if (!type) {
                 return;
             }
 
-            player.resetFacing();
-
-            player.keys[type] = data.state;
-
-            if (data.state) {
-                player.facing = type;
-                player.walking = true;
-            } else {
-                player.walking = false;
-            }
+            fn(false, "Username already exists");
+        }).catch(function (error) {
+            fn(false, "Something went wrong: " + error.message);
         });
-
-        var timeout = null;
-        socket.on("message", function (data) {
-            if (timeout) {
-                clearTimeout(timeout);
-            }
-
-            mysql.insert("messagelog", {
-                "username"  :   name,
-                "message"   :   data,
-                "date"      :   Math.floor(Date.now() / 1000)
-            });
-
-            player.message = data;
-
-            timeout = setTimeout(function() {
-                player.message = "";
-            }, 4000);
-        })
     });
+
+    // Main game functions
+    socket.on("login", function (username) {
+        socket.game.player = new Player(username);
+        players[username] = socket.game.player;
+
+        socket.game.listeners = {
+            "nofocus"       :   function () {
+                socket.game.player.resetFacing();
+                socket.game.player.walking = false;
+            },
+            "keyPress"      :   function (data) {
+                var type = data.type;
+                if (!type) {
+                    return;
+                }
+
+                socket.game.player.resetFacing();
+
+                socket.game.player.keys[type] = data.state;
+
+                if (data.state) {
+                    socket.game.player.facing = type;
+                    socket.game.player.walking = true;
+                } else {
+                    socket.game.player.walking = false;
+                }
+            },
+            "message"       :   function (data) {
+                if (socket.game.player.timeout) {
+                    clearTimeout(socket.game.player.timeout);
+                }
+
+                mysql.insert("messagelog", {
+                    "username"  :   socket.game.player.id,
+                    "message"   :   data,
+                    "date"      :   Math.floor(Date.now() / 1000)
+                });
+
+                socket.game.player.message.id = socket.game.player.id + "_" + Math.round((new Date()).getTime() / 1000);
+                socket.game.player.message.text = data;
+
+                socket.game.player.timeout = setTimeout(function () {
+                    socket.game.player.message.id = socket.game.player.id + "_" + Math.round((new Date()).getTime() / 1000);
+                    socket.game.player.message.text = "";
+                }, 4000);
+            },
+        };
+
+        for (var action in socket.game.listeners) {
+            var func = socket.game.listeners[action];
+
+            socket.on(action, func);
+        }
+    });
+
+    socket.on("logout", function () {
+        logoutUser(socket);
+
+        if (socket.game.listeners) {
+            // Remove all of the game listeners on the socket.
+            for (var action in socket.game.listeners) {
+                socket.removeAllListeners(action);
+            }
+        }
+
+        socket.game = {};
+    });
+
+    socket.on("disconnect", function () {
+        logoutUser(socket);
+
+        delete sockets[session];
+    });
+
+    sockets[session] = socket;
 });
 
-function createUser(email, username, password, avatar, fn)
+function logoutUser(socket)
 {
-    mysql.record("users", {"username": username}).then(function (record) {
-        if (!record) {
-            var hash = bcrypt.hashSync(password, 10);
-            mysql.insert("users", {
-                "username"  :   username,
-                "password"  :   hash,
-                "email"     :   email,
-                "avatar"    :   avatar,
-                "health"    :   100
-            }).then(function(info){
-                mysql.insert("positions", {
-                    "username"  :   username,
-                    "x"         :   Math.random() * (240 - 0) + 0,
-                    "y"         :   Math.random() * (160 - 0) + 0,
-                    "facing"    :   "down"
-                }).catch(function (error) {
-                    mysql.delete("users", {"username": username});
+    if (socket.game.player) {
+        if (socket.game.player.timeout) {
+            clearTimeout(socket.game.player.timeout);
+        }
 
-                    fn(false, error.message);
-                })
+        var username = socket.game.player.id;
 
-                fn(true);
-            }).catch(function (error) {
-                fn(false, error.message);
-            });
-
+        var player = players[username];
+        if (!player) {
             return;
         }
 
-        fn(false, "Username already exists");
-    }).catch(function (error) {
-        fn(false, "Something went wrong: " + error.message);
-    });
-}
+        mysql.update("users", {"username": username}, {
+            "health"    :   player.hp
+        });
 
-function logoutUser(username)
-{
-    var player = players[username];
+        mysql.update("positions", {"username": username}, {
+            "x"         :   player.x,
+            "y"         :   player.y,
+            "facing"    :   player.facing
+        });
 
-    mysql.update("users", {"username": username}, {
-        "health"    :   player.hp
-    });
-
-    mysql.update("positions", {"username": username}, {
-        "x"         :   player.x,
-        "y"         :   player.y,
-        "facing"    :   player.facing
-    });
-
-    delete players[username];
+        delete players[username];
+    }
 }
 
 setInterval(function () {
-    var details = [];
+    var details = {
+        "players"   :   [],
+    };
     for (var i in players) {
         var player = players[i];
         player.updatePosition();
         player.updateFrame();
-        details.push({
+        details.players.push({
             "id"        :   player.id,
             "hp"        :   player.hp,
             "avatar"    :   player.avatar,
@@ -283,7 +312,10 @@ setInterval(function () {
             "frame"     :   Math.ceil(player.frame),
             "x"         :   player.x,
             "y"         :   player.y,
-            "message"   :   player.message,
+            "message"   :   {
+                "id"        :   player.message.id,
+                "text"      :   player.message.text,
+            },
         });
     }
 
