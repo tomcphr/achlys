@@ -74,9 +74,21 @@
                     <br>
                 </div>
             </div>
+            <div id='inventoryDialog' class='hidden'>
+                <div style='border: 1px solid #000; padding: 3px;' class='fullWidth'>
+                    <table id='inventoryItemTable' class='fullWidth'>
+                        <tr>
+                            <td>Item</td>
+                            <td class='fRight'>Quantity</td>
+                        </tr>
+                        <tr><td colspan='2'><hr></td></tr>
+                    </table>
+                </div>
+            </div>
             <div id='uiOverlay' class='hidden'>
                 <div id='userName'></div>
                 <button id='logoutButton' class='fRight'>Logout</button>
+                <button id='inventoryButton'>Inventory</button>
                 <div id='messageContainer'>
                     <div id='messageHistory'></div>
                     <input type='text' name='message' id='messageText'>

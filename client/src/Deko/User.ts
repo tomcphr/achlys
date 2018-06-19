@@ -122,6 +122,7 @@ export class User
                 $("#loginButton").off("click");
                 $("#uiOverlay").hide();
                 $(".historicMessage").remove();
+                $("#inventoryDialog").dialog("close");
                 self.prompt("login");
             });
 

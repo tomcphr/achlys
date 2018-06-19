@@ -197,6 +197,20 @@ io.sockets.on("connection", function (socket) {
         players[username] = socket.game.player;
 
         socket.game.listeners = {
+            "getItems"      :   function (username, fn) {
+                var select = "SELECT a.item, b.name, b.description, a.quantity FROM inventories a ";
+                var join = "JOIN items b ON b.id = a.item ";
+                var where = "WHERE a.? ";
+                var query = select + join + where;
+
+                mysql.query(query, {
+                    "username"  :   username
+                }).then(function (results) {
+                    fn("data", results);
+                }).catch(function (error) {
+                    fn("error", "Could not get a list of inventory items for this user");
+                });
+            },
             "nofocus"       :   function () {
                 socket.game.player.resetFacing();
                 socket.game.player.walking = false;

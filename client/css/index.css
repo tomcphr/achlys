@@ -65,6 +65,14 @@
     display: inline-block;
 }
 
+#inventoryButton {
+    position: fixed;
+    left: 90%;
+    bottom: 0%;
+    transform: translate(2.5%, -5%);
+    margin: 0 auto;
+}
+
 #messageContainer {
     position: fixed;
     left: 0%;

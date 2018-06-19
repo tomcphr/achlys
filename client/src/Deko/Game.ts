@@ -1,4 +1,5 @@
 import {World} from "./World";
+import {Inventory} from "./Inventory";
 
 export class Game
 {
@@ -53,6 +54,14 @@ export class Game
 
                 var healthWidth = 50;
                 world.drawHealth((hudX - (healthWidth / 2)), (player.y + (world.playerHeight * world.playerMultiplier)) + 7, player.hp, healthWidth);
+            }
+        });
+
+        var inventory = new Inventory(this.socket, username);
+        $("#inventoryButton").click(function () {
+            var invenDialog = ".ui-dialog[aria-describedby='inventoryDialog']";
+            if (!$(invenDialog).is(":visible")) {
+                inventory.open();
             }
         });
 
