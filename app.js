@@ -116,6 +116,11 @@ io.sockets.on("connection", function (socket) {
 
     // Listen out for the user validation.
     socket.on("login", function (form, fn) {
+        if (!form.username || !form.password) {
+            fn(false, "Invalid user details provided");
+            return;
+        }
+
         var username = form.username.toLowerCase();
 
         // Ensure that the user isn't already logged in
