@@ -114,7 +114,7 @@ io.sockets.on("connection", function (socket) {
     socket.game = {};
 
     // Listen out for the user validation.
-    socket.on("validate", function (form, fn) {
+    socket.on("login", function (form, fn) {
         var username = form.username.toLowerCase();
 
         // Ensure that the user isn't already logged in
@@ -124,6 +124,7 @@ io.sockets.on("connection", function (socket) {
         } else {
             mysql.record("users", {"username": username}).then(function (record) {
                 if (bcrypt.compareSync(form.password, record.password)) {
+                    playGame(socket, username);
                     fn(true);
                     return;
                 }
@@ -191,77 +192,115 @@ io.sockets.on("connection", function (socket) {
         });
     });
 
-    // Main game functions
-    socket.on("login", function (username) {
-        socket.game.player = new Player(username);
-        players[username] = socket.game.player;
+    sockets[session] = socket;
+});
 
-        socket.game.listeners = {
-            "getItems"      :   function (username, fn) {
-                var select = "SELECT a.item, b.name, b.description, a.quantity FROM inventories a ";
-                var join = "JOIN items b ON b.id = a.item ";
-                var where = "WHERE a.? ";
-                var query = select + join + where;
+function playGame(socket, username)
+{
+    socket.game.player = new Player(username);
+    players[username] = socket.game.player;
 
-                mysql.query(query, {
-                    "username"  :   username
-                }).then(function (results) {
-                    fn("data", results);
-                }).catch(function (error) {
-                    fn("error", "Could not get a list of inventory items for this user");
-                });
-            },
-            "nofocus"       :   function () {
-                socket.game.player.resetFacing();
+    socket.game.listeners = {
+        "getUsername"   :   function (fn) {
+            fn(username);
+        },
+        "getItems"      :   function (fn) {
+            var select = "SELECT a.item, b.name, b.description, a.quantity FROM inventories a ";
+            var join = "JOIN items b ON b.id = a.item ";
+            var where = "WHERE a.? ";
+            var query = select + join + where;
+
+            mysql.query(query, {
+                "username"  :   username
+            }).then(function (results) {
+                fn("data", results);
+            }).catch(function (error) {
+                fn("error", "Could not get a list of inventory items for this user");
+            });
+        },
+        "nofocus"       :   function () {
+            socket.game.player.resetFacing();
+            socket.game.player.walking = false;
+        },
+        "keyPress"      :   function (data) {
+            var type = data.type;
+            if (!type) {
+                return;
+            }
+
+            socket.game.player.resetFacing();
+
+            socket.game.player.keys[type] = data.state;
+
+            if (data.state) {
+                socket.game.player.facing = type;
+                socket.game.player.walking = true;
+            } else {
                 socket.game.player.walking = false;
-            },
-            "keyPress"      :   function (data) {
-                var type = data.type;
-                if (!type) {
-                    return;
-                }
+            }
+        },
+        "message"       :   function (data) {
+            if (socket.game.player.timeout) {
+                clearTimeout(socket.game.player.timeout);
+            }
 
-                socket.game.player.resetFacing();
+            mysql.insert("messagelog", {
+                "username"  :   socket.game.player.id,
+                "message"   :   data,
+                "date"      :   Math.floor(Date.now() / 1000)
+            });
 
-                socket.game.player.keys[type] = data.state;
+            socket.game.player.message.id = socket.game.player.id + "_" + Math.round((new Date()).getTime() / 1000);
+            socket.game.player.message.text = data;
 
-                if (data.state) {
-                    socket.game.player.facing = type;
-                    socket.game.player.walking = true;
-                } else {
-                    socket.game.player.walking = false;
-                }
-            },
-            "message"       :   function (data) {
-                if (socket.game.player.timeout) {
-                    clearTimeout(socket.game.player.timeout);
-                }
-
-                mysql.insert("messagelog", {
-                    "username"  :   socket.game.player.id,
-                    "message"   :   data,
-                    "date"      :   Math.floor(Date.now() / 1000)
-                });
-
+            socket.game.player.timeout = setTimeout(function () {
                 socket.game.player.message.id = socket.game.player.id + "_" + Math.round((new Date()).getTime() / 1000);
-                socket.game.player.message.text = data;
+                socket.game.player.message.text = "";
+            }, 4000);
+        },
+    };
 
-                socket.game.player.timeout = setTimeout(function () {
-                    socket.game.player.message.id = socket.game.player.id + "_" + Math.round((new Date()).getTime() / 1000);
-                    socket.game.player.message.text = "";
-                }, 4000);
-            },
+    for (var action in socket.game.listeners) {
+        var func = socket.game.listeners[action];
+
+        socket.on(action, func);
+    }
+
+    var gameTick = setInterval(function () {
+        var details = {
+            "loggedIn"  :   "",
+            "players"   :   [],
         };
-
-        for (var action in socket.game.listeners) {
-            var func = socket.game.listeners[action];
-
-            socket.on(action, func);
+        for (var i in players) {
+            var player = players[i];
+            player.updatePosition();
+            player.updateFrame();
+            details.players.push({
+                "id"        :   player.id,
+                "hp"        :   player.hp,
+                "avatar"    :   player.avatar,
+                "facing"    :   player.facing,
+                "frame"     :   Math.ceil(player.frame),
+                "x"         :   player.x,
+                "y"         :   player.y,
+                "message"   :   {
+                    "id"        :   player.message.id,
+                    "text"      :   player.message.text,
+                },
+            });
         }
-    });
+
+        for (var i in sockets) {
+            var socket = sockets[i];
+
+            details.loggedIn = socket.game.player.id;
+
+            socket.emit("details", details);
+        }
+    }, 1000 / 30);
 
     socket.on("logout", function () {
-        logoutUser(socket);
+        logoutUser(socket, gameTick);
 
         if (socket.game.listeners) {
             // Remove all of the game listeners on the socket.
@@ -274,16 +313,16 @@ io.sockets.on("connection", function (socket) {
     });
 
     socket.on("disconnect", function () {
-        logoutUser(socket);
+        logoutUser(socket, gameTick);
 
         delete sockets[session];
     });
+}
 
-    sockets[session] = socket;
-});
-
-function logoutUser(socket)
+function logoutUser(socket, gameTick)
 {
+    clearInterval(gameTick);
+
     if (socket.game.player) {
         if (socket.game.player.timeout) {
             clearTimeout(socket.game.player.timeout);
@@ -309,33 +348,3 @@ function logoutUser(socket)
         delete players[username];
     }
 }
-
-setInterval(function () {
-    var details = {
-        "players"   :   [],
-    };
-    for (var i in players) {
-        var player = players[i];
-        player.updatePosition();
-        player.updateFrame();
-        details.players.push({
-            "id"        :   player.id,
-            "hp"        :   player.hp,
-            "avatar"    :   player.avatar,
-            "facing"    :   player.facing,
-            "frame"     :   Math.ceil(player.frame),
-            "x"         :   player.x,
-            "y"         :   player.y,
-            "message"   :   {
-                "id"        :   player.message.id,
-                "text"      :   player.message.text,
-            },
-        });
-    }
-
-    for (var i in sockets) {
-        var socket = sockets[i];
-
-        socket.emit("details", details);
-    }
-}, 1000 / 30);

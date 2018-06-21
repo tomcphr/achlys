@@ -19,7 +19,7 @@ export class Game
         this.height = this.canvas.height;
     }
 
-    start (username: string)
+    start ()
     {
         var self = this;
 
@@ -31,6 +31,7 @@ export class Game
         this.socket.on("details", function (data) {
             ctx.clearRect(0, 0, self.width, self.height);
 
+            var loggedIn = data.loggedIn;
             var players = data.players;
             for (var i = 0; i < players.length; i++) {
                 var player = players[i];
@@ -40,7 +41,7 @@ export class Game
                 var hudX = (player.x + ((world.playerWidth * world.playerMultiplier) / 2));
 
                 var increment = 5;
-                if (player.id != username) {
+                if (player.id != loggedIn) {
                     world.drawMessage(hudX, (player.y + increment), player.id);
                     increment += 12.5;
                 }
@@ -57,7 +58,7 @@ export class Game
             }
         });
 
-        var inventory = new Inventory(this.socket, username);
+        var inventory = new Inventory(this.socket);
         $("#inventoryButton").click(function () {
             var invenDialog = ".ui-dialog[aria-describedby='inventoryDialog']";
             if (!$(invenDialog).is(":visible")) {

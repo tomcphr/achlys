@@ -1,13 +1,10 @@
 export class Inventory
 {
     socket: SocketIOClient.Socket;
-    username: string;
 
-    constructor (socket: SocketIOClient.Socket, username: string)
+    constructor (socket: SocketIOClient.Socket)
     {
         this.socket = socket;
-
-        this.username = username;
     }
 
     open ()
@@ -32,7 +29,7 @@ export class Inventory
 
     populateInventory ()
     {
-        this.socket.emit("getItems", this.username, function (type, message) {
+        this.socket.emit("getItems", function (type, message) {
             switch (type) {
                 case "data":
                     for (var data in message) {

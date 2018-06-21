@@ -102,7 +102,7 @@ export class User
         var self = this;
 
         var socket = this.socket;
-        this.socket.emit("validate", {
+        this.socket.emit("login", {
             "username": username,
             "password": password
         }, function (valid) {
@@ -115,21 +115,18 @@ export class User
 
             $("#uiOverlay").show();
 
-            socket.emit("login", username);
-
             $("#gameContainer").on("click", "#logoutButton", function () {
                 socket.emit("logout");
                 $("#loginButton").off("click");
                 $("#uiOverlay").hide();
                 $(".historicMessage").remove();
-                $("#inventoryDialog").dialog("close");
                 self.prompt("login");
             });
 
             $("#userName").html(username);
 
             var game = new Game(socket);
-            game.start(username);
+            game.start();
         });
     }
 
