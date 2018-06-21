@@ -88,7 +88,8 @@ export class User
             height: "auto",
             width: 400,
             open: function (event, ui) {
-                $(".ui-dialog-titlebar-close").remove();
+                var loginDialog = ".ui-dialog[aria-describedby='loginDialog']";
+                $(loginDialog).find(".ui-dialog-titlebar-close").remove();
             },
             buttons: dialog.buttons
         });
