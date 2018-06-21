@@ -124,7 +124,7 @@ io.sockets.on("connection", function (socket) {
         } else {
             mysql.record("users", {"username": username}).then(function (record) {
                 if (bcrypt.compareSync(form.password, record.password)) {
-                    playGame(socket, username);
+                    playGame(session, socket, username);
                     fn(true);
                     return;
                 }
@@ -195,7 +195,7 @@ io.sockets.on("connection", function (socket) {
     sockets[session] = socket;
 });
 
-function playGame(socket, username)
+function playGame(session, socket, username)
 {
     socket.game.player = new Player(username);
     players[username] = socket.game.player;
