@@ -13,6 +13,9 @@ $(function () {
     });
     $("#sendMessage").click(function () {
         var message = $("#messageText").val();
+        if (!message) {
+            return;
+        }
 
         socket.emit("message", message);
 
