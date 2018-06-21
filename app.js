@@ -266,41 +266,8 @@ function playGame(socket, username)
         socket.on(action, func);
     }
 
-    var gameTick = setInterval(function () {
-        var details = {
-            "loggedIn"  :   "",
-            "players"   :   [],
-        };
-        for (var i in players) {
-            var player = players[i];
-            player.updatePosition();
-            player.updateFrame();
-            details.players.push({
-                "id"        :   player.id,
-                "hp"        :   player.hp,
-                "avatar"    :   player.avatar,
-                "facing"    :   player.facing,
-                "frame"     :   Math.ceil(player.frame),
-                "x"         :   player.x,
-                "y"         :   player.y,
-                "message"   :   {
-                    "id"        :   player.message.id,
-                    "text"      :   player.message.text,
-                },
-            });
-        }
-
-        for (var i in sockets) {
-            var socket = sockets[i];
-
-            details.loggedIn = socket.game.player.id;
-
-            socket.emit("details", details);
-        }
-    }, 1000 / 30);
-
     socket.on("logout", function () {
-        logoutUser(socket, gameTick);
+        logoutUser(socket);
 
         if (socket.game.listeners) {
             // Remove all of the game listeners on the socket.
@@ -313,16 +280,14 @@ function playGame(socket, username)
     });
 
     socket.on("disconnect", function () {
-        logoutUser(socket, gameTick);
+        logoutUser(socket);
 
         delete sockets[session];
     });
 }
 
-function logoutUser(socket, gameTick)
+function logoutUser(socket)
 {
-    clearInterval(gameTick);
-
     if (socket.game.player) {
         if (socket.game.player.timeout) {
             clearTimeout(socket.game.player.timeout);
@@ -346,5 +311,42 @@ function logoutUser(socket, gameTick)
         });
 
         delete players[username];
+    }
+}
+
+setInterval(sendPackets, 1000 / 30);
+function sendPackets()
+{
+    var details = {
+        "loggedIn"  :   "",
+        "players"   :   [],
+    };
+    for (var i in players) {
+        var player = players[i];
+        player.updatePosition();
+        player.updateFrame();
+        details.players.push({
+            "id"        :   player.id,
+            "hp"        :   player.hp,
+            "avatar"    :   player.avatar,
+            "facing"    :   player.facing,
+            "frame"     :   Math.ceil(player.frame),
+            "x"         :   player.x,
+            "y"         :   player.y,
+            "message"   :   {
+                "id"        :   player.message.id,
+                "text"      :   player.message.text,
+            },
+        });
+    }
+
+    for (var i in sockets) {
+        var socket = sockets[i];
+
+        if (socket.game.player) {
+            details.loggedIn = socket.game.player.id;
+        }
+
+        socket.emit("details", details);
     }
 }
