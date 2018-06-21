@@ -33,40 +33,59 @@ export class Inventory
     populateInventory ()
     {
         this.socket.emit("getItems", this.username, function (type, message) {
-            if (type === "error") {
-                var row = $("<tr class='inventoryItem'>");
-                var detail = $("<td>", {
-                    "colspan"    :    2,
-                }).html(message);
-                row.append(detail);
-                $("#inventoryItemTable").append(row);
-            } else if (type === "data") {
-                for (var detail in message) {
-                    var item = message[detail];
+            switch (type) {
+                case "data":
+                    for (var data in message) {
+                        var item = message[data];
 
-                    var template = {
-                        "name"            :     "Item",
-                        "description"     :     "Item Description",
-                        "quantity"        :     "1",
-                    };
-                    for (var property in template) {
-                        template[property] = item[property];
+                        var template = {
+                            "name"            :     "Item",
+                            "description"     :     "Item Description",
+                            "quantity"        :     "1",
+                        };
+                        for (var property in template) {
+                            template[property] = item[property];
+                        }
+
+                        var name = $("<div>", {
+                            "class"    :     "itemDetail",
+                            "title"    :     template.description
+                        }).html(template.name);
+
+                        var quantity = $("<div>", {
+                            "class"    :     "itemDetail",
+                            "style"    :     "text-align: right;",
+                        }).html(template.quantity);
+
+                        var row = $("<div class='itemRow inventoryItem fullWidth'>");
+                        row.append(name);
+                        row.append(quantity);
+
+                        $("#inventoryItems").append(row);
+
+                        $("#inventoryItems").append($("<hr>", {
+                            "class"    :     "itemSplit inventoryItem",
+                        }));
                     }
+                    break;
 
-                    var name = $("<td>", {
-                        "title"    :     template.description
-                    }).html(template.name);
+                case "error":
+                    var div = $("<div>", {
+                        "class"    :     "inventoryItem textCenter ui-state-error ui-corner-all",
+                    });
+                    div.append(message);
 
-                    var quantity = $("<td>", {
-                        "class"    :     "fRight"
-                    }).html(template.quantity);
+                    $("#inventoryItems").append(div);
+                    break;
 
-                    var row = $("<tr class='inventoryItem'>");
-                    row.append(name);
-                    row.append(quantity);
+                default:
+                    var div = $("<div>", {
+                        "class"    :     "inventoryItem textCenter ui-state-error ui-corner-all",
+                    });
+                    div.append("Something has gone wrong");
 
-                    $("#inventoryItemTable").append(row);
-                }
+                    $("#inventoryItems").append(div);
+                    break;
             }
         });
     }

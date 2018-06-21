@@ -7,7 +7,7 @@ declare var require: {
     ) => void;
 };
 
-// Allow the user of the JQuery impromptu plugin
+// Add interfaces to support JQuery plugins
 interface JQueryStatic {
     prompt: any;
 }
