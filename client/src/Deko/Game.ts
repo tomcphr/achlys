@@ -32,6 +32,9 @@ export class Game
             ctx.clearRect(0, 0, self.width, self.height);
 
             var loggedIn = data.loggedIn;
+            if (!loggedIn) {
+                return;
+            }
             var players = data.players;
             for (var i = 0; i < players.length; i++) {
                 var player = players[i];

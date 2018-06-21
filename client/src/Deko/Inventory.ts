@@ -49,10 +49,11 @@ export class Inventory
                             "title"    :     template.description
                         }).html(template.name);
 
+                        var amount = new Intl.NumberFormat().format(parseInt(template.quantity));
                         var quantity = $("<div>", {
                             "class"    :     "itemDetail",
                             "style"    :     "text-align: right;",
-                        }).html(template.quantity);
+                        }).html(amount);
 
                         var row = $("<div class='itemRow inventoryItem fullWidth'>");
                         row.append(name);
@@ -64,6 +65,7 @@ export class Inventory
                             "class"    :     "itemSplit inventoryItem",
                         }));
                     }
+                    $(".itemDetail").tooltip();
                     break;
 
                 case "error":

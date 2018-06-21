@@ -1,4 +1,5 @@
 import {Game} from "./Game";
+import * as emailValidator from 'email-validator';
 
 export class User
 {
@@ -49,6 +50,11 @@ export class User
                         text: "Register",
                         click: function () {
                             var email = $("#registerEmail").val().toString();
+                            if (!emailValidator.validate(email)) {
+                                $.prompt("Email address provided not valid");
+                                return;
+                            }
+
                             var username = $("#registerUsername").val().toString();
                             var password = $("#registerPassword").val().toString();
                             var avatar = $(".registerAvatar:checked").val().toString();
@@ -106,9 +112,9 @@ export class User
         this.socket.emit("login", {
             "username": username,
             "password": password
-        }, function (valid) {
+        }, function (valid, message) {
             if (!valid) {
-                $.prompt("Invalid username and or password");
+                $.prompt(message);
                 return;
             }
 
@@ -118,11 +124,11 @@ export class User
 
             $("#gameContainer").on("click", "#logoutButton", function () {
                 socket.emit("logout");
-                $("#loginButton").off("click");
-                $("#uiOverlay").hide();
-                $(".historicMessage").remove();
-                $(".ui-dialog-content").dialog("close");
-                self.prompt("login");
+                self.logout();
+            });
+
+            socket.on("disconnect", function () {
+                self.logout();
             });
 
             $("#userName").html(username);
@@ -147,5 +153,22 @@ export class User
                 $.prompt(message);
             }
         });
+    }
+
+    logout ()
+    {
+        // Clear any UI elements from the game
+        $("#loginButton").off("click");
+        $("#uiOverlay").hide();
+        $(".historicMessage").remove();
+        $(".ui-dialog-content").dialog("close");
+
+        // Clear the canvas
+        var canvas = <HTMLCanvasElement> document.getElementById("ctx");
+        var ctx = canvas.getContext("2d");
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Prompt the login screen
+        this.prompt("login");
     }
 }

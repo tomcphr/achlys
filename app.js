@@ -3,6 +3,7 @@ var app = express();
 var host = require("http").Server(app);
 var mysql = require("node-mysql-helper");
 var bcrypt = require("bcrypt");
+var validator = require("email-validator");
 
 app.get("/", function (req, res) {
     res.sendFile(__dirname + "/client/index.html");
@@ -119,7 +120,7 @@ io.sockets.on("connection", function (socket) {
 
         // Ensure that the user isn't already logged in
         if (players.hasOwnProperty(username)) {
-            fn(false);
+            fn(false, "User already logged in");
             return;
         } else {
             mysql.record("users", {"username": username}).then(function (record) {
@@ -129,15 +130,16 @@ io.sockets.on("connection", function (socket) {
                     return;
                 }
                 fn(false);
-            }).catch (function () {
-                fn(false);
+            }).catch (function (error) {
+                fn(false, error.message);
             });
         }
     });
 
     socket.on("create", function (form, fn) {
-        if (!form.email) {
-            fn(false, "Email address cannot be blank");
+        var valid = validator.validate(form.email);
+        if (!valid) {
+            fn(false, "Email address provided not valid");
             return;
         }
 
