@@ -59,6 +59,13 @@ export class Game
                 var healthWidth = 50;
                 world.drawHealth((hudX - (healthWidth / 2)), (player.y + (object.getHeight() * object.getScale())) + 7, player.hp, healthWidth);
             }
+
+            var items = data.items;
+            for (var i = 0; i < items.length; i++) {
+                var item = items[i];
+
+                world.drawItem(item.x, item.y, item.id);
+            }
         });
 
         var inventory = new Inventory(this.socket);

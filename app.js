@@ -33,6 +33,7 @@ console.log("Listening on Port '" + port + "'");
 
 var sockets = {};
 var players = {};
+var items = {};
 
 var Player = function (id) {
     var object = {
@@ -41,6 +42,8 @@ var Player = function (id) {
         "avatar"    :   "M",
         "x"         :   Math.random() * (240 - 0) + 0,
         "y"         :   Math.random() * (160 - 0) + 0,
+        "width"     :   24,
+        "height"    :   32,
         "message"   :   {
             "id"        :   id + "_" + Math.round((new Date()).getTime() / 1000),
             "text"      :   "",
@@ -72,6 +75,59 @@ var Player = function (id) {
             object.facing = record.facing;
         }
     });
+
+    object.pickup = function (itemId, quantity)
+    {
+        var where = {
+            "username"  :   object.id,
+            "item"      :   itemId,
+        };
+
+        mysql.record("inventories", where).then(function (record) {
+            if (!record) {
+                mysql.insert("inventories", {
+                    "username"  :   object.id,
+                    "item"      :   itemId,
+                    "quantity"  :   quantity,
+                });
+
+                return;
+            }
+
+            mysql.update("inventories", where, {
+                "quantity"  :   quantity + record.quantity,
+            });
+        })
+    }
+
+    object.die = function () {
+        getInventoryItems(object.id, function (type, inventory) {
+            if (type && inventory) {
+                for (var key in inventory) {
+                    var item = inventory[key];
+
+                    var key = "drop_" + object.id + "_" + item["id"] + "_" + Math.round((new Date()).getTime() / 1000);
+
+                    items[key] = {
+                        "id"        :   item["id"],
+                        "name"      :   item["name"],
+                        "quantity"  :   item["quantity"],
+                        "x"         :   object.x,
+                        "y"         :   object.y,
+                        "width"     :   32,
+                        "height"    :   32
+                    };
+                }
+
+                mysql.delete("inventories", {"username": id});
+            }
+            object.x = Math.random() * (240 - 0) + 0;
+
+            object.y = Math.random() * (160 - 0) + 0;
+
+            object.hp = 100;
+        });
+    }
 
     object.resetFacing = function () {
         for (var property in object.keys) {
@@ -212,17 +268,8 @@ function playGame(session, socket, username)
             fn(username);
         },
         "getItems"      :   function (fn) {
-            var select = "SELECT a.item, b.name, b.description, a.quantity FROM inventories a ";
-            var join = "JOIN items b ON b.id = a.item ";
-            var where = "WHERE a.? ";
-            var query = select + join + where;
-
-            mysql.query(query, {
-                "username"  :   username
-            }).then(function (results) {
-                fn("data", results);
-            }).catch(function (error) {
-                fn("error", "Could not get a list of inventory items for this user");
+            getInventoryItems(username, function (type, message) {
+                fn(type, message);
             });
         },
         "nofocus"       :   function () {
@@ -247,6 +294,33 @@ function playGame(session, socket, username)
             }
         },
         "message"       :   function (data) {
+            // Server commands
+            if (data.startsWith("/")) {
+                var message = data.split(" ");
+                if (message[0] === "/kill") {
+                    var user = message[1];
+                    if (players.hasOwnProperty(user)) {
+                        players[user].die();
+                    }
+                }
+                if (message[0] === "/teleport") {
+                    var user = message[1];
+                    if (players.hasOwnProperty(user)) {
+                        socket.game.player.x = players[user].x;
+                        socket.game.player.y = players[user].y
+                    }
+                }
+                if (message[0] === "/summon") {
+                    var user = message[1];
+                    if (players.hasOwnProperty(user)) {
+                        players[user].x = socket.game.player.x;
+                        players[user].y = socket.game.player.y;
+                    }
+                }
+                return;
+            }
+
+            // Normal messages
             if (socket.game.player.timeout) {
                 clearTimeout(socket.game.player.timeout);
             }
@@ -321,17 +395,51 @@ function logoutUser(socket)
     }
 }
 
+function getInventoryItems(username, callback)
+{
+    var select = "SELECT b.id, b.name, b.description, a.quantity FROM inventories a ";
+    var join = "JOIN items b ON b.id = a.item ";
+    var where = "WHERE a.? ";
+    var query = select + join + where;
+
+    mysql.query(query, {
+        "username"  :   username
+    }).then(function (results) {
+        callback(true, results);
+    }).catch(function (error) {
+        callback(false, "Could not get a list of inventory items for this user");
+    });
+}
+
 setInterval(sendPackets, 1000 / 30);
 function sendPackets()
 {
     var details = {
         "loggedIn"  :   "",
         "players"   :   [],
+        "items"     :   [],
     };
+
     for (var i in players) {
         var player = players[i];
         player.updatePosition();
         player.updateFrame();
+
+        if (player.hp <= 0) {
+            player.die();
+        }
+
+        // Check if the player is touching any dropped items
+        for (var k in items) {
+            var item = items[k];
+
+            var match = areColliding(player, item);
+            if (match) {
+                player.pickup(item.id, item.quantity);
+                delete items[k];
+            }
+        }
+
         details.players.push({
             "id"        :   player.id,
             "hp"        :   player.hp,
@@ -347,6 +455,13 @@ function sendPackets()
         });
     }
 
+    for (var k in items) {
+        var item = items[k];
+        item.key = k;
+
+        details.items.push(item);
+    }
+
     for (var i in sockets) {
         var socket = sockets[i];
 
@@ -356,4 +471,14 @@ function sendPackets()
 
         socket.emit("details", details);
     }
+}
+
+function areColliding(object1, object2)
+{
+    if (object1.x < object2.x + object2.width  && object1.x + object1.width  > object2.x &&
+        object1.y < object2.y + object2.height && object1.y + object1.height > object2.y) {
+        return true;
+    }
+
+    return false;
 }

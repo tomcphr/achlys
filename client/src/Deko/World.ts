@@ -13,17 +13,20 @@ export class World
 
         this.ctx = ctx;
 
-        var avatars = [
+        var sprites = [
             "M",
             "F",
+            "item_1",
+            "item_2",
+            "item_3",
         ];
-        for (var i = 0; i < avatars.length; i++) {
-            var avatar = avatars[i];
+        for (var i = 0; i < sprites.length; i++) {
+            var sprite = sprites[i];
 
             var image = new Image();
-            image.src = "/img/player_" + avatar + ".png";
+            image.src = "/img/images/" + sprite + ".png";
 
-            this.images[avatar] = image;
+            this.images[sprite] = image;
         }
     }
 
@@ -56,6 +59,13 @@ export class World
         object.draw(x, y, innerX, innerY);
 
         return object;
+    }
+
+    drawItem (x: number, y: number, itemId: number)
+    {
+        var object = new WorldObject(this.ctx, this.images["item_" + itemId], 32, 32);
+        object.scaleBy(2);
+        object.draw(x, y, 0, 0);
     }
 
     drawMessage (x: number, y: number, message: string)
