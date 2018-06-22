@@ -39,9 +39,9 @@ export class Game
             for (var i = 0; i < players.length; i++) {
                 var player = players[i];
 
-                world.drawPlayer(player.x, player.y, player.avatar, player.facing, player.frame);
+                var object = world.drawObject(player.x, player.y, player.avatar, player.facing, player.frame);
 
-                var hudX = (player.x + ((world.playerWidth * world.playerMultiplier) / 2));
+                var hudX = (player.x + ((object.getWidth() * object.getScale()) / 2));
 
                 var increment = 5;
                 if (player.id != loggedIn) {
@@ -57,7 +57,7 @@ export class Game
                 }
 
                 var healthWidth = 50;
-                world.drawHealth((hudX - (healthWidth / 2)), (player.y + (world.playerHeight * world.playerMultiplier)) + 7, player.hp, healthWidth);
+                world.drawHealth((hudX - (healthWidth / 2)), (player.y + (object.getHeight() * object.getScale())) + 7, player.hp, healthWidth);
             }
         });
 
