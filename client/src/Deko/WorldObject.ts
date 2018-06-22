@@ -13,6 +13,7 @@ export class WorldObject
         this.image = i;
         this.width = w;
         this.height = h;
+        this.scale = 1;
     };
 
     getWidth ()

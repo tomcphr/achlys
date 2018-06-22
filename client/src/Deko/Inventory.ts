@@ -30,61 +30,60 @@ export class Inventory
     populateInventory ()
     {
         this.socket.emit("getItems", function (type, message) {
-            switch (type) {
-                case "data":
-                    for (var data in message) {
-                        var item = message[data];
+            if (type) {
+                for (var data in message) {
+                    var item = message[data];
 
-                        var template = {
-                            "name"            :     "Item",
-                            "description"     :     "Item Description",
-                            "quantity"        :     "1",
-                        };
-                        for (var property in template) {
-                            template[property] = item[property];
-                        }
-
-                        var name = $("<div>", {
-                            "class"    :     "itemDetail",
-                            "title"    :     template.description
-                        }).html(template.name);
-
-                        var amount = new Intl.NumberFormat().format(parseInt(template.quantity));
-                        var quantity = $("<div>", {
-                            "class"    :     "itemDetail",
-                            "style"    :     "text-align: right;",
-                        }).html(amount);
-
-                        var row = $("<div class='itemRow inventoryItem fullWidth'>");
-                        row.append(name);
-                        row.append(quantity);
-
-                        $("#inventoryItems").append(row);
-
-                        $("#inventoryItems").append($("<hr>", {
-                            "class"    :     "itemSplit inventoryItem",
-                        }));
+                    var template = {
+                        "id"              :     "0",
+                        "name"            :     "Item",
+                        "description"     :     "Item Description",
+                        "quantity"        :     "1",
+                    };
+                    for (var property in template) {
+                        template[property] = item[property];
                     }
-                    $(".itemDetail").tooltip();
-                    break;
 
-                case "error":
-                    var div = $("<div>", {
-                        "class"    :     "inventoryItem textCenter ui-state-error ui-corner-all",
+                    var icon = $("<img>", {
+                        "src"      :    "/img/images/item_" + template.id + ".png",
+                        "style"    :     "vertical-align: middle;"
                     });
-                    div.append(message);
+                    var image = $("<div>", {
+                        "class"    :     "itemDetail",
+                        "style"    :     "width: 15%;",
+                    }).append(icon)
 
-                    $("#inventoryItems").append(div);
-                    break;
+                    var name = $("<div>", {
+                        "class"    :     "itemDetail",
+                        "title"    :     template.description,
+                        "style"    :     "width: 40%; line-height: 32px; vertical-align: middle;",
+                    }).html(template.name);
 
-                default:
-                    var div = $("<div>", {
-                        "class"    :     "inventoryItem textCenter ui-state-error ui-corner-all",
-                    });
-                    div.append("Something has gone wrong");
+                    var amount = new Intl.NumberFormat().format(parseInt(template.quantity));
+                    var quantity = $("<div>", {
+                        "class"    :     "itemDetail",
+                        "style"    :     "text-align: right; width: 40%; line-height: 32px; vertical-align: middle;",
+                    }).html(amount);
 
-                    $("#inventoryItems").append(div);
-                    break;
+                    var row = $("<div class='itemRow inventoryItem fullWidth'>");
+                    row.append(image);
+                    row.append(name);
+                    row.append(quantity);
+
+                    $("#inventoryItems").append(row);
+
+                    $("#inventoryItems").append($("<hr>", {
+                        "class"    :     "itemSplit inventoryItem",
+                    }));
+                }
+                $(".itemDetail").tooltip();
+            } else {
+                var div = $("<div>", {
+                    "class"    :     "inventoryItem textCenter ui-state-error ui-corner-all",
+                });
+                div.append(message);
+
+                $("#inventoryItems").append(div);
             }
         });
     }
