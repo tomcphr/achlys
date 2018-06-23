@@ -192,7 +192,7 @@ io.sockets.on("connection", function (socket) {
                     fn(true);
                     return;
                 }
-                fn(false);
+                fn(false, "Username or password not valid");
             }).catch (function (error) {
                 fn(false, error.message);
             });
