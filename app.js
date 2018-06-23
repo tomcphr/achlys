@@ -38,6 +38,7 @@ var items = {};
 var Player = function (id) {
     var object = {
         "id"        :   id,
+        "moderator" :   0,
         "hp"        :   100,
         "avatar"    :   "M",
         "x"         :   Math.random() * (240 - 0) + 0,
@@ -63,6 +64,7 @@ var Player = function (id) {
 
     mysql.record("users", {"username": id}).then(function (record) {
         if (record) {
+            object.moderator = record.moderator;
             object.avatar = record.avatar;
             object.hp = record.health;
         }
@@ -294,30 +296,38 @@ function playGame(session, socket, username)
             }
         },
         "message"       :   function (data) {
-            // Server commands
-            if (data.startsWith("/")) {
+            // Allow server commands if the user is a moderator
+            if (data.startsWith("/") && socket.game.player.moderator) {
                 var message = data.split(" ");
+
+                // Kill any player specified
                 if (message[0] === "/kill") {
                     var user = message[1];
                     if (players.hasOwnProperty(user)) {
                         players[user].die();
                     }
+                    return;
                 }
+
+                // Teleport the current user to any player
                 if (message[0] === "/teleport") {
                     var user = message[1];
                     if (players.hasOwnProperty(user)) {
                         socket.game.player.x = players[user].x;
                         socket.game.player.y = players[user].y
                     }
+                    return;
                 }
+
+                // Teleport a player to the current user
                 if (message[0] === "/summon") {
                     var user = message[1];
                     if (players.hasOwnProperty(user)) {
                         players[user].x = socket.game.player.x;
                         players[user].y = socket.game.player.y;
                     }
+                    return;
                 }
-                return;
             }
 
             // Normal messages
