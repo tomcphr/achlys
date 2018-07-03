@@ -1,5 +1,5 @@
 {
-  "name": "deko",
+  "name": "achlys",
   "version": "0.0.6",
   "description": "",
   "main": "app.js",
@@ -25,12 +25,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tomcphr/deko.git"
+    "url": "git+https://github.com/tomcphr/achlys.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/tomcphr/deko/issues"
+    "url": "https://github.com/tomcphr/achlys/issues"
   },
-  "homepage": "https://github.com/tomcphr/deko#readme"
+  "homepage": "https://github.com/tomcphr/achlys#readme"
 }
