@@ -27,7 +27,7 @@
     "type": "git",
     "url": "git+https://github.com/tomcphr/achlys.git"
   },
-  "author": "",
+  "author": "tomcphr",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/tomcphr/achlys/issues"
