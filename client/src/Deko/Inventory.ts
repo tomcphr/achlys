@@ -29,7 +29,7 @@ export class Inventory
 
     populateInventory ()
     {
-        this.socket.emit("getItems", function (type, message) {
+        this.socket.emit("items", function (type, message) {
             if (type) {
                 for (var data in message) {
                     var item = message[data];

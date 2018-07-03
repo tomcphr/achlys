@@ -31,8 +31,8 @@ export class Game
         this.socket.on("details", function (data) {
             ctx.clearRect(0, 0, self.width, self.height);
 
-            var loggedIn = data.loggedIn;
-            if (!loggedIn) {
+            var logged = data.logged;
+            if (!logged) {
                 return;
             }
             var players = data.players;
@@ -44,7 +44,7 @@ export class Game
                 var hudX = (player.x + ((object.getWidth() * object.getScale()) / 2));
 
                 var increment = 5;
-                if (player.id != loggedIn) {
+                if (player.id != logged) {
                     world.drawMessage(hudX, (player.y + increment), player.id);
                     increment += 12.5;
                 }
@@ -57,7 +57,7 @@ export class Game
                 }
 
                 var healthWidth = 50;
-                world.drawHealth((hudX - (healthWidth / 2)), (player.y + (object.getHeight() * object.getScale())) + 7, player.hp, healthWidth);
+                world.drawHealth((hudX - (healthWidth / 2)), (player.y + (object.getHeight() * object.getScale())) + 7, player.health, healthWidth);
             }
 
             var items = data.items;
@@ -89,7 +89,7 @@ export class Game
                 return;
             }
             var type = self.pressKey(event.keyCode);
-            self.socket.emit("keyPress", {
+            self.socket.emit("keys", {
                 "type"  :   type,
                 "state" :   true,
             });
@@ -97,14 +97,14 @@ export class Game
 
         window.onkeyup = function (event) {
             var type = self.pressKey(event.keyCode);
-            self.socket.emit("keyPress", {
+            self.socket.emit("keys", {
                 "type"  :   type,
                 "state" :   false,
             });
         }
 
         $(window).blur(function() {
-            self.socket.emit("nofocus");
+            self.socket.emit("pause");
         });
     }
 
