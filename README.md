@@ -1,5 +1,5 @@
-# Deko
-A small online RPG written in TypeScript (client) and JavaScript (host)
+# Achlys
+A post-apocalyptic MMORPG written in TypeScript (client) and JavaScript (host)
 
 # Dependencies
 * nodejs
