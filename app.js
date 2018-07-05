@@ -199,29 +199,31 @@ io.sockets.on("connection", function (socket) {
         mysql.record("users", {"username": form.username})
             .then(function (record) {
                 if (!record) {
-                    var hash = bcrypt.hashSync(form.password, 10);
-                    mysql.insert("users", {
-                        "username"  :   form.username,
-                        "password"  :   hash,
-                        "email"     :   form.email,
-                        "avatar"    :   form.avatar,
-                        "health"    :   100
-                    }).then(function (){
-                        mysql.insert("positions", {
-                            "username"  :   form.username,
-                            "x"         :   Math.random() * (960 - 0) + 0,
-                            "y"         :   Math.random() * (600 - 0) + 0,
-                            "facing"    :   "down"
-                        }).catch(function (error) {
-                            mysql.delete("users", {"username": form.username});
+                    bcrypt.hash(form.password, 10)
+                        .then(function(hash) {
+                            mysql.insert("users", {
+                                "username"  :   form.username,
+                                "password"  :   hash,
+                                "email"     :   form.email,
+                                "avatar"    :   form.avatar,
+                                "health"    :   100
+                            }).then(function (){
+                                mysql.insert("positions", {
+                                    "username"  :   form.username,
+                                    "x"         :   Math.random() * (960 - 0) + 0,
+                                    "y"         :   Math.random() * (600 - 0) + 0,
+                                    "facing"    :   "down"
+                                }).catch(function (error) {
+                                    mysql.delete("users", {"username": form.username});
 
-                            callback(false, error.message);
-                        }).then(function () {
-                            callback(true, "Successfully created user");
+                                    callback(false, error.message);
+                                }).then(function () {
+                                    callback(true, "Successfully created user");
+                                });
+                            }).catch(function (error) {
+                                callback(false, error.message);
+                            });
                         });
-                    }).catch(function (error) {
-                        callback(false, error.message);
-                    });
 
                     return;
                 }
@@ -276,13 +278,14 @@ function getSession (socket, world, mysql, bcrypt) {
 
             mysql.record("users", {"username": username}).then(function (record) {
                 if (record) {
-                    if (bcrypt.compareSync(password, record.password)) {
-                        callback(true, "User successfully logged in");
-
-                        return;
-                    }
-
-                    callback(false, "Username or password not valid");
+                    bcrypt.compare(password, record.password)
+                        .then(function(match) {
+                            if (match) {
+                                callback(true, "User successfully logged in");
+                            } else {
+                                callback(false, "Username or password not valid");
+                            }
+                        });
 
                     return;
                 }
