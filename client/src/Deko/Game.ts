@@ -69,10 +69,15 @@ export class Game
         });
 
         var inventory = new Inventory(this.socket);
+        var invenDialog = inventory.class;
         $("#inventoryButton").click(function () {
-            var invenDialog = ".ui-dialog[aria-describedby='inventoryDialog']";
             if (!$(invenDialog).is(":visible")) {
                 inventory.open();
+            }
+        });
+        self.socket.on("updated-items", function () {
+            if ($(invenDialog).is(":visible")) {
+                inventory.showItems();
             }
         });
 

@@ -76,11 +76,17 @@
             </div>
             <div id='inventoryDialog' class='hidden'>
                 <div id='inventoryItems' class='fullWidth'>
-                    <div class='itemRow fullWidth'>
-                        <div class='itemDetail' style='width: 55%;'>Item</div>
-                        <div class='itemDetail' style='text-align: right; width: 40%;'>Quantity</div>
+                    <div id='templateItem' class='hidden'>
+                        <div class='itemContainer' data-item='' data-name='' style='width: 40px; border: 1px solid #000; display: inline-block; margin: 5px;'>
+                            <img class='itemImage' style='padding-right: 2px; padding-left: 2px; padding-top: 2px; margin-bottom: 1px; border-bottom: 0.1px solid #000;' src=''>
+                            <div class='itemQuantity' style='text-align: center; font-size: 12px; padding-bottom: 2px;'></div>
+                        </div>
                     </div>
-                    <hr>
+                </div>
+                <div id='inventoryContext'>
+                    <ul class='contextItems'>
+                        <li class='contextOption' data-action='D'>Drop</li>
+                    </ul>
                 </div>
             </div>
             <div id='uiOverlay' class='hidden'>
