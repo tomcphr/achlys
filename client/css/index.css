@@ -124,3 +124,36 @@
     text-align: center;
     width: 15%;
 }
+
+/** Inventory Context Menu **/
+.contextItems {
+    list-style: none;
+    margin: 0px;
+    margin-top: 4px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 3px;
+    font-size: 17px;
+    color: #333333;
+}
+.contextItems li {
+    padding: 3px;
+    padding-left: 10px;
+}
+.contextItems :hover {
+    color: white;
+    background: #284570;
+    border-radius: 2px;
+}
+
+#inventoryContext {
+    display: none;
+    position: fixed;
+    border: 1px solid #B2B2B2;
+    width: 100px;
+    background:#F9F9F9;
+    cursor: pointer;
+}
+.itemContainer {
+    cursor: pointer;
+}

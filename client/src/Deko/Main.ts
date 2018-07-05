@@ -5,6 +5,10 @@ $(function () {
 
     var user = new User(socket);
 
+    $("#ctx").bind("contextmenu", function (e) {
+        return false;
+    });
+
     $("#messageText").on("keyup", function (event) {
         event.preventDefault();
         if (event.keyCode === 13) {

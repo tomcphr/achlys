@@ -100,9 +100,13 @@ let world = {
         }, 250);
     },
 
-    removeDrop: function (dropKey) {
+    removeDrop: function (dropKey, callback) {
         if (!this.items.hasOwnProperty(dropKey)) {
             return;
+        }
+
+        if (callback) {
+            callback();
         }
 
         delete this.items[dropKey];
@@ -156,7 +160,7 @@ io.sockets.on("connection", function (socket) {
 
         session.login(username, form.password, function (status, message) {
             if (status) {
-                var user = getUser(username, mysql);
+                var user = getUser(username, socket, mysql);
                 session.setUser(user);
 
                 world.addSession(session);
@@ -230,6 +234,9 @@ io.sockets.on("connection", function (socket) {
 
     socket.on("logout", function () {
         world.removeUser(session);
+
+        var game = getGame(session, world, mysql);
+        game.stop();
     })
 
     socket.on("disconnect", function () {
@@ -289,7 +296,7 @@ function getSession (socket, world, mysql, bcrypt) {
     return session;
 }
 
-function getUser (username, mysql) {
+function getUser (username, socket, mysql) {
     let user = {
         id: username,
         x: Math.random() * (960 - 0) + 0,
@@ -341,26 +348,29 @@ function getUser (username, mysql) {
                 "item"      :   item,
             };
 
-            mysql.record("inventories", where).then(function (record) {
-                if (!record) {
-                    mysql.insert("inventories", {
-                        "username"  :   username,
-                        "item"      :   item,
-                        "quantity"  :   quantity,
-                    });
+            mysql.record("inventories", where)
+                .then(function (record) {
+                    if (!record) {
+                        mysql.insert("inventories", {
+                            "username"  :   username,
+                            "item"      :   item,
+                            "quantity"  :   quantity,
+                        }).then(function () {
+                            socket.emit("updated-items");
+                        });
+                    } else {
+                        var update = (parseInt(record.quantity) + parseInt(quantity));
 
-                    return;
-                }
-
-                var update = (parseInt(record.quantity) + parseInt(quantity));
-
-                mysql.update("inventories", where, {
-                    "quantity"  :   update,
+                        mysql.update("inventories", where, {
+                            "quantity"  :   update,
+                        }).then(function () {
+                            socket.emit("updated-items");
+                        });
+                    }
                 });
-            });
         },
 
-        drop: function (item, name, quantity, x, y) {
+        drop: function (item, name, quantity, x, y, callback) {
             if (!x || !y) {
                 x = this.x;
                 y = this.y;
@@ -377,39 +387,53 @@ function getUser (username, mysql) {
 
             mysql.record("inventories", where)
                 .then(function (record) {
-                    var update = (record.quantity - quantity);
+                    if (!record) {
+                        return;
+                    }
 
-                    if (update > 0) {
-                        mysql.update("inventories", where, {
-                            "quantity"  :   update,
-                        }).catch(function (error) {
-                            console.log(error.message);
-                        });
-                    } else {
-                        mysql.delete("inventories", {id: record.id})
-                            .catch(function (error) {
-                                console.log(error.message);
-                            });
+                    var update = (record.quantity - quantity);
+                    if (update < 0) {
+                        callback(false, "You do not have this many to drop");
+                        return;
                     }
 
                     switch (facing) {
                         case "left":
-                            x -= width;
+                            x -= (width * 2);
                             break;
                         case "right":
-                            x += width;
+                            x += (width * 2);
                             break;
                         case "up":
-                            y -= height;
+                            y -= (height * 2);
                             break;
                         case "down":
-                            y += height;
+                            y += (height * 2);
                             break;
                     }
 
-                    world.addDrop(item, name, quantity, x, y);
+                    if (update > 0) {
+                        mysql.update("inventories", where, {
+                            "quantity"  :   update,
+                        }).then(function () {
+                            world.addDrop(item, name, quantity, x, y);
+                            callback(true, "Successful drop");
+                        }).catch(function (error) {
+                            callback(false, error.message);
+                        });
+                    } else if (update == 0) {
+                        mysql.delete("inventories", {
+                            id: record.id
+                        }).then(function () {
+                            world.addDrop(item, name, quantity, x, y);
+                            callback(true, "Successful drop");
+                        }).catch(function (error) {
+                            callback(false, error.message);
+                            return;
+                        });
+                    }
                 }).catch(function (error) {
-                    console.log(error.message);
+                    callback(false, error.message);
                 });
         },
 
@@ -420,7 +444,11 @@ function getUser (username, mysql) {
                     for (var key in inventory) {
                         var item = inventory[key];
 
-                        self.drop(item.id, item.name, item.quantity, self.x, self.y);
+                        self.drop(item.id, item.name, item.quantity, self.x, self.y, function (status, message) {
+                            if (!status) {
+                                console.log(message);
+                            }
+                        });
                     }
                 }
 
@@ -493,6 +521,23 @@ function getGame (session, world, mysql)
                 }
                 getInventory(mysql, session.user.id, function (type, message) {
                     callback(type, message);
+                });
+            },
+            "drop"      :   function (item, name, quantity, callback) {
+                if (!session.user) {
+                    return;
+                }
+
+                var x = session.user.x;
+                var y = session.user.y;
+
+                session.user.drop(item, name, quantity, x, y, function (status, message) {
+                    if (!status) {
+                        console.log(message);
+                        return;
+                    }
+
+                    callback();
                 });
             },
             "pause"     :   function () {
@@ -629,9 +674,9 @@ setInterval(function () {
                 var item = world.items[i];
 
                 if (world.collision(user, item)) {
-                    user.pickup(item.id, item.quantity);
-
-                    world.removeDrop(i);
+                    world.removeDrop(i, function () {
+                        user.pickup(item.id, item.quantity);
+                    });
                 }
             }
 
@@ -648,8 +693,6 @@ setInterval(function () {
                     "text"      :   user.message.text,
                 },
             });
-
-            packet.logged = user.id;
         }
     }
 
@@ -665,6 +708,10 @@ setInterval(function () {
     // Send the details of the world to every session
     for (var s in world.sessions) {
         var session = world.sessions[s];
+
+        if (session.user) {
+            packet.logged = session.user.id;
+        }
 
         session.getSocket().emit("details", packet);
     }
