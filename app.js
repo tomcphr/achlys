@@ -32,6 +32,8 @@ host.listen(port);
 console.log("Listening on Port '" + port + "'");
 
 let world = {
+    tileWidth: 32,
+    tileHeight: 32,
     sessions: {},
     items: {},
 
@@ -113,8 +115,9 @@ let world = {
     },
 
     collision: function (object1, object2) {
-        if (object1.x < object2.x + object2.width  && object1.x + object1.width  > object2.x &&
-            object1.y < object2.y + object2.height && object1.y + object1.height > object2.y) {
+        var xMatch = object1.x < object2.x + object2.width  && object1.x + object1.width  > object2.x;
+        var yMatch = object1.y < object2.y + object2.height && object1.y + object1.height > object2.y;
+        if (xMatch && yMatch) {
             return true;
         }
 
@@ -160,7 +163,7 @@ io.sockets.on("connection", function (socket) {
 
         session.login(username, form.password, function (status, message) {
             if (status) {
-                var user = getUser(username, socket, mysql);
+                var user = getUser(world, username, socket, mysql);
                 session.setUser(user);
 
                 world.addSession(session);
@@ -210,8 +213,8 @@ io.sockets.on("connection", function (socket) {
                             }).then(function (){
                                 mysql.insert("positions", {
                                     "username"  :   form.username,
-                                    "x"         :   Math.random() * (960 - 0) + 0,
-                                    "y"         :   Math.random() * (600 - 0) + 0,
+                                    "x"         :   getRandomPosition(960),
+                                    "y"         :   getRandomPosition(600),
                                     "facing"    :   "down"
                                 }).catch(function (error) {
                                     mysql.delete("users", {"username": form.username});
@@ -299,20 +302,24 @@ function getSession (socket, world, mysql, bcrypt) {
     return session;
 }
 
-function getUser (username, socket, mysql) {
+function getUser (world, username, socket, mysql) {
+    var x = getRandomPosition(960);
+    var y = getRandomPosition(600);
     let user = {
         id: username,
-        x: Math.random() * (960 - 0) + 0,
-        y: Math.random() * (600 - 0) + 0,
-        width: 24,
-        height: 32,
+        x: x,
+        y: y,
+        targetX: x,
+        targetY: y,
+        width: (24 * 2),
+        height: (world.tileHeight * 2),
         moderator: 0,
         health: 100,
         avatar: "M",
         facing: "down",
         frame: 1,
         walking: false,
-        speed: 9,
+        speed: 8,
         loaded: false,
 
         message: {
@@ -324,12 +331,24 @@ function getUser (username, socket, mysql) {
         position: function (keys) {
             if (keys.right) {
                 this.x += this.speed;
+                if (this.x > this.targetX) {
+                    this.targetX += 32;
+                }
             } else if (keys.left) {
                 this.x -= this.speed;
+                if (this.x < this.targetX) {
+                    this.targetX -= 32;
+                }
             } else if (keys.up) {
                 this.y -= this.speed;
+                if (this.y < this.targetY) {
+                    this.targetY -= 32;
+                }
             } else if (keys.down) {
                 this.y += this.speed;
+                if (this.y > this.targetY) {
+                    this.targetY += 32;
+                }
             }
         },
 
@@ -353,15 +372,7 @@ function getUser (username, socket, mysql) {
 
             mysql.record("inventories", where)
                 .then(function (record) {
-                    if (!record) {
-                        mysql.insert("inventories", {
-                            "username"  :   username,
-                            "item"      :   item,
-                            "quantity"  :   quantity,
-                        }).then(function () {
-                            socket.emit("updated-items");
-                        });
-                    } else {
+                    if (record) {
                         var update = (parseInt(record.quantity) + parseInt(quantity));
 
                         mysql.update("inventories", where, {
@@ -369,15 +380,22 @@ function getUser (username, socket, mysql) {
                         }).then(function () {
                             socket.emit("updated-items");
                         });
+                        return;
                     }
+
+                    mysql.insert("inventories", {
+                        "username"  :   username,
+                        "item"      :   item,
+                        "quantity"  :   quantity,
+                    }).then(function () {
+                        socket.emit("updated-items");
+                    });
                 });
         },
 
-        drop: function (item, name, quantity, x, y, callback) {
-            if (!x || !y) {
-                x = this.x;
-                y = this.y;
-            }
+        drop: function (item, name, quantity, callback) {
+            x = this.x;
+            y = this.y;
 
             var where = {
                 "username"  :   username,
@@ -402,16 +420,18 @@ function getUser (username, socket, mysql) {
 
                     switch (facing) {
                         case "left":
-                            x -= (width * 2);
+                            x -= world.tileWidth;
+                            y += (height - world.tileHeight);
                             break;
                         case "right":
-                            x += (width * 2);
+                            x += width;
+                            y += (height - world.tileHeight);
                             break;
                         case "up":
-                            y -= (height * 2);
+                            y -= world.tileHeight;
                             break;
                         case "down":
-                            y += (height * 2);
+                            y += ((height) + world.tileHeight);
                             break;
                     }
 
@@ -447,7 +467,7 @@ function getUser (username, socket, mysql) {
                     for (var key in inventory) {
                         var item = inventory[key];
 
-                        self.drop(item.id, item.name, item.quantity, self.x, self.y, function (status, message) {
+                        self.drop(item.id, item.name, item.quantity, function (status, message) {
                             if (!status) {
                                 console.log(message);
                             }
@@ -455,8 +475,8 @@ function getUser (username, socket, mysql) {
                     }
                 }
 
-                self.x = Math.random() * (960 - 0) + 0;
-                self.y = Math.random() * (600 - 0) + 0;
+                self.x = getRandomPosition(960);
+                self.y = getRandomPosition(600);
 
                 self.health = 100;
             });
@@ -477,6 +497,8 @@ function getUser (username, socket, mysql) {
         user.health = data[0].health;
         user.x = data[0].x;
         user.y = data[0].y;
+        user.targetX = data[0].x;
+        user.targetY = data[0].y;
         user.facing = data[0].facing;
     }).catch(function (error) {
         console.log(error.message);
@@ -531,10 +553,7 @@ function getGame (session, world, mysql)
                     return;
                 }
 
-                var x = session.user.x;
-                var y = session.user.y;
-
-                session.user.drop(item, name, quantity, x, y, function (status, message) {
+                session.user.drop(item, name, quantity, function (status, message) {
                     if (!status) {
                         console.log(message);
                         return;
@@ -652,6 +671,15 @@ function getInventory(mysql, username, callback)
     }).catch(function (error) {
         callback(false, "Could not get a list of inventory items for this user");
     });
+}
+
+function getRandomPosition (max)
+{
+    var randomNumber = Math.random() * (max - 0) + 0;
+
+    var tileNumber = Math.ceil(randomNumber / 32) * 32;
+
+    return tileNumber;
 }
 
 setInterval(function () {

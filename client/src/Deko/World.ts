@@ -55,7 +55,7 @@ export class World
         }
 
         var object = new WorldObject(this.ctx, this.images[avatar], width, height);
-        object.scaleBy(3);
+        object.scaleBy(2);
         object.draw(x, y, innerX, innerY);
 
         return object;
@@ -64,7 +64,7 @@ export class World
     drawItem (x: number, y: number, itemId: number)
     {
         var object = new WorldObject(this.ctx, this.images["item_" + itemId], 32, 32);
-        object.scaleBy(2);
+        object.scaleBy(1);
         object.draw(x, y, 0, 0);
     }
 
