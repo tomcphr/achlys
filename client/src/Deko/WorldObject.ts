@@ -38,6 +38,9 @@ export class WorldObject
 
     draw (positionX: number, positionY: number, imageX: number, imageY: number)
     {
+        var scaledWidth = this.width * this.scale;
+        var scaledHeight = this.height * this.scale;
+
         this.ctx.drawImage(
             this.image,
             imageX,
@@ -46,8 +49,8 @@ export class WorldObject
             this.height,
             positionX,
             positionY,
-            this.width * this.scale,
-            this.height * this.scale,
+            scaledWidth,
+            scaledHeight,
         );
     };
 }
