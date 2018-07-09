@@ -500,6 +500,7 @@ function getUser (world, username, socket, mysql) {
         user.targetX = data[0].x;
         user.targetY = data[0].y;
         user.facing = data[0].facing;
+        user.loaded = true;
     }).catch(function (error) {
         console.log(error.message);
     });
@@ -694,6 +695,10 @@ setInterval(function () {
 
         if (session.user) {
             var user = session.user;
+            if (!user.loaded) {
+                continue;
+            }
+
             user.position(session.keys);
             user.animation();
             if (user.health <= 0) {
