@@ -112,7 +112,7 @@ export class Inventory
     {
         var self = this;
 
-        $(".itemContainer").on("contextmenu", function (e) {
+        $("#inventoryDialog").on("contextmenu", ".itemContainer", function (e) {
             e.preventDefault();
 
             var item = $(this).data("item");
