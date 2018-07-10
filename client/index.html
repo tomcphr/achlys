@@ -40,35 +40,38 @@
                     id='html_register'
                     class='hidden dialogHtml'
                 >
-                    <div class='textCenter fullWidth'>
-                        <label for='registerEmail'>Email:</label>
-                        <br>
-                        <input type='text' class='textCenter' id='registerEmail'>
-                    </div>
-                    <br>
-                    <div class='textCenter fullWidth'>
-                        <label for='registerUsername'>Username:</label>
-                        <br>
-                        <input type='text' class='textCenter' id='registerUsername'>
-                    </div>
-                    <br>
-                    <div class='textCenter fullWidth'>
-                        <label for='registerPassword'>Password:</label>
-                        <br>
-                        <input type='password' class='textCenter' id='registerPassword'>
-                    </div>
-                    <br>
-                    <div class='textCenter fullWidth'>
-                        Avatar: <br>
-                        <div style='display: inline-block;'>
-                            <img class='textCenter avatarHover' src='/img/register/M.png'></img>
+                    <div class='fullWidth' style='height: 50%;'>
+                        <div class='textCenter fullWidth'>
+                            <label for='registerEmail'>Email:</label>
                             <br>
-                            <input class='textCenter registerAvatar' name='registerAvatar' type='radio' value='M' checked>
+                            <input type='text' class='textCenter' id='registerEmail'>
                         </div>
-                        <div style='display: inline-block;'>
-                            <img class='textCenter avatarHover' src='/img/register/F.png'></img>
+                        <br>
+                        <div class='textCenter fullWidth'>
+                            <label for='registerUsername'>Username:</label>
                             <br>
-                            <input class='textCenter registerAvatar' name='registerAvatar' type='radio' value='F'>
+                            <input type='text' class='textCenter' id='registerUsername'>
+                        </div>
+                        <br>
+                        <div class='textCenter fullWidth'>
+                            <label for='registerPassword'>Password:</label>
+                            <br>
+                            <input type='password' class='textCenter' id='registerPassword'>
+                        </div>
+                    </div>
+                    <br>
+                    <div style='width: 60%; height: 50%;' class='fCenter'>
+                        <div class='fLeft' style='width: 48%; height: 100%;display: inline-block;'>
+                            <div style='height: 50%;'>Avatar:</div>
+                            <div style='height: 50%;'>
+                                <select id='avatarSelect' name='registerAvatar' class='fullWidth'>
+                                    <option value='M'>1</option>
+                                    <option value='F'>2</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class='fRight' style='width: 48%; height: 100%; border: 1px solid #000; display: inline-block;'>
+                            <img id='avatarImage' class='fCenter' src='/img/register/M.png' width='48' height='64'></img>
                         </div>
                     </div>
                     <br>

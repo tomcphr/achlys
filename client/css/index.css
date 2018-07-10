@@ -58,6 +58,11 @@
 .fRight {
     float: right;
 }
+.fCenter {
+    display: block;
+    margin-right: auto;
+    margin-left: auto;
+}
 
 #userName {
     margin-left: 10px;
