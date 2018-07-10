@@ -17,9 +17,9 @@ export class User
         var self = this;
 
         var types = {
-            "login"        :     {
-                "title"         :    "Login",
-                "buttons"       :    [
+            "login"         :   {
+                "title"         :   "Login",
+                "buttons"       :   [
                     {
                         text: "Register",
                         click: function () {
@@ -38,8 +38,8 @@ export class User
                 ]
             },
             "register"    :     {
-                "title"         :    "Register",
-                "buttons"       :    [
+                "title"         :   "Register",
+                "buttons"       :   [
                     {
                         text: "Back",
                         click: function () {
@@ -57,7 +57,7 @@ export class User
 
                             var username = $("#registerUsername").val().toString();
                             var password = $("#registerPassword").val().toString();
-                            var avatar = $(".registerAvatar:checked").val().toString();
+                            var avatar = $("#avatarSelect").val().toString();
 
                             self.register(email, username, password, avatar);
                         }

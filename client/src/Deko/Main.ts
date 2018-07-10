@@ -5,6 +5,14 @@ $(function () {
 
     var user = new User(socket);
 
+    $(document).on("change", "#avatarSelect", function () {
+        var value = $(this).val();
+
+        var src = "/img/register/" + value + ".png";
+
+        $("#avatarImage").attr("src", src);
+    });
+
     $("#ctx").bind("contextmenu", function (e) {
         return false;
     });
