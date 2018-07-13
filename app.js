@@ -537,6 +537,17 @@ function getGame (session, world, mysql)
                 }
 
                 user.pickup(item, quantity);
+            },
+            "op": (username) => {
+                mysql.record("users", {"username": username})
+                    .then((user) => {
+                        if (user !== null) {
+                            mysql.update("users", {"username": username}, {
+                                "moderator": 1
+                            });
+                        }
+                    }
+                );
             }
         },
 
