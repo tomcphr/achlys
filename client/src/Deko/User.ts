@@ -122,6 +122,7 @@ export class User
 
             $("#uiOverlay").show();
 
+            $("#gameContainer").off("click", "#logoutButton");
             $("#gameContainer").on("click", "#logoutButton", function () {
                 socket.emit("logout");
                 self.logout();
@@ -141,7 +142,7 @@ export class User
     register (email: string, username: string, password: string, avatar: string)
     {
         var self = this;
-        this.socket.emit("create", {
+        this.socket.emit("register", {
             "email": email,
             "username": username,
             "password": password,

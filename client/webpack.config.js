@@ -1,4 +1,4 @@
-const path = require('path');
+const path = require("path");
 
 module.exports = {
   watch: false,
@@ -7,7 +7,7 @@ module.exports = {
     aggregateTimeout: 300
   },
   mode: 'development',
-  entry: './client/src/App.ts',
+  entry: './src/App.ts',
   module: {
     rules: [{
       test: /\.tsx?$/,
@@ -19,7 +19,7 @@ module.exports = {
     extensions: ['.tsx', '.ts', '.js']
   },
   output: {
-    filename: './js/index.js',
-    path: path.resolve(__dirname, 'client')
+    filename: './index.js',
+    path: path.resolve(__dirname, 'js')
   }
 };

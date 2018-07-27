@@ -1,0 +1,18 @@
+{
+  "name": "achlys",
+  "version": "0.1.0",
+  "description": "",
+  "main": "app.js",
+  "dependencies": {
+    "bcrypt": "^2.0.1",
+    "email-validator": "^2.0.4",
+    "express": "^4.16.3",
+    "node-mysql-helper": "^0.6.7",
+    "socket.io": "^2.1.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tomcphr/achlys.git"
+  },
+  "author": "tomcphr"
+}
