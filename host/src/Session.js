@@ -119,20 +119,20 @@ class Session {
                                         "email"     :   email,
                                         "avatar"    :   avatar,
                                         "health"    :   100
-                                    }).then(function (){
+                                    }).then(()  =>  {
                                         self.sql.insert("positions", {
                                             "username"  :   username,
                                             "x"         :   self.world.getRandomX(),
                                             "y"         :   self.world.getRandomY(),
                                             "facing"    :   "down"
-                                        }).catch(function (error) {
+                                        }).catch((error)  =>  {
                                             self.sql.delete("users", {"username": username});
 
                                             callback(false, error.message);
-                                        }).then(function () {
+                                        }).then(()  =>  {
                                             callback(true, "Successfully created user");
                                         });
-                                    }).catch(function (error) {
+                                    }).catch((error)  =>  {
                                         callback(false, error.message);
                                     });
                                 });
@@ -141,7 +141,7 @@ class Session {
                         }
 
                         callback(false, "Username already exists");
-                    }).catch(function (error) {
+                    }).catch((error)  =>  {
                         callback(false, "Something went wrong: " + error.message);
                     });
             })
