@@ -67,11 +67,11 @@ class User {
     };
 
     respawn () {
-        this.health = 100;
         this.x = this.world.getRandomX();
         this.y = this.world.getRandomY();
         this.targetX = this.x;
         this.targetY = this.y;
+        this.health = 100;
     };
 
     position (keys) {
@@ -263,23 +263,32 @@ class User {
 
     die () {
         var self = this;
+        self.loaded = false;
         self.items((status, message)   =>  {
             if (!status) {
                 console.log(message);
                 return;
             }
 
+            var totalItems = 0;
+            var droppedItems = 0;
             for (var key in message) {
+                totalItems++;
+
                 var item = message[key];
 
                 self.drop(item.id, item.name, item.quantity, (status, message) =>  {
                     if (!status) {
                         console.log(message);
                     }
+                    droppedItems++;
                 });
             }
 
-            self.respawn();
+            if (totalItems === droppedItems) {
+                self.respawn();
+                self.loaded = true;
+            }
         })
     };
 
