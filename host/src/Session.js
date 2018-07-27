@@ -10,7 +10,8 @@ class Session {
             "left"      :   false,
             "right"     :   false,
             "up"        :   false,
-            "down"      :   false
+            "down"      :   false,
+            "space"     :   false
         };
 
         this.encryption = require("bcrypt");

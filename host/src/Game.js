@@ -79,9 +79,11 @@ class Game {
 
         this.session.setCurrentKey(type, value);
 
-        this.user.walking = value;
-        if (value) {
-            this.user.facing = type;
+        if (data.type !== "space") {
+            this.user.walking = value;
+            if (value) {
+                this.user.facing = type;
+            }
         }
     };
 

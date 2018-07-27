@@ -69,7 +69,31 @@ class World {
             return;
         }
 
-        user.position(session.getKeys());
+        var keys = session.getKeys();
+        if (keys.space) {
+            user.attack();
+
+            // Check if the user is attacking any players
+            for (var s in this.sessions) {
+                var current = this.sessions[s];
+                if (current.id == session.id) {
+                    continue;
+                }
+
+                if (this.collision(session.user, current.user)) {
+                    // Only allow to attack if the user is facing that player.
+                    if (current.user.health > 0) {
+                        current.user.health -= 5;
+                        if (current.user.health < 0) {
+                            current.user.health = 0;
+                        }
+                    }
+                }
+            }
+        }
+
+        user.position(keys);
+
         user.animation();
         if (user.health <= 0) {
             user.die();
