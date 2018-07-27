@@ -48,10 +48,7 @@ class World {
             for (var s in self.sessions) {
                 var session = self.sessions[s];
 
-                packet["logged"] = "";
-                if (session.user) {
-                    packet["logged"] = session.user.id;
-                }
+                packet["logged"] = session.user.id;
 
                 session.getSocket().emit("details", packet);
             };
