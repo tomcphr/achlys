@@ -98,6 +98,9 @@ class User {
         }
     };
 
+    attack () {
+    };
+
     animation () {
         if (this.walking) {
             if (this.frame < 2) {

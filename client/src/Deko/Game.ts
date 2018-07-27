@@ -132,6 +132,9 @@ export class Game
             case 38:
                 return "up";
 
+            case 32:
+                return "space";
+
             default:
                 return 0;
         }
