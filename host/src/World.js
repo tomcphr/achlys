@@ -104,7 +104,7 @@ class World {
             var item = this.items[i];
 
             if (this.collision(user, item)) {
-                this.removeDrop(i, function () {
+                this.removeDrop(i, ()   =>  {
                     user.pickup(item.id, item.quantity);
                 });
             }
@@ -188,7 +188,7 @@ class World {
         var self = this;
 
         // Use setTimeout to ensure we get a unique item drop identifier
-        setTimeout(function () {
+        setTimeout(()   =>  {
             var key = "drop_" + item + "_" + quantity + "_" + Math.round((new Date()).getTime() / 1000);
 
             self.items[key] = {

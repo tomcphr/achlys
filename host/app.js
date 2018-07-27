@@ -6,7 +6,7 @@ serve.listen();
 let world = new (require("./src/World"))();
 world.tick();
 
-serve.getIo().sockets.on("connection", function (socket) {
+serve.getIo().sockets.on("connection", (socket)  =>  {
     var session = new (require("./src/Session"))(sql, socket, world);
 
     socket.on("login", (form, callback) => {
