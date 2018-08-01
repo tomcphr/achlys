@@ -109,7 +109,6 @@ class Session {
 
                 self.sql.record("users", {"username": username})
                     .then((record)  =>  {
-                        console.log(record);
                         if (!record) {
                             self.encryption.hash(password, 10)
                                 .then((hash)    =>  {

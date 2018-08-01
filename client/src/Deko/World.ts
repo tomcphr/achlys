@@ -30,6 +30,29 @@ export class World
         }
     }
 
+    drawPlayer (player, isUser)
+    {
+        var object = this.drawObject(player.x, player.y, player.avatar, player.facing, player.frame);
+
+        var hudX = (player.x + ((object.getWidth() * object.getScale()) / 2));
+
+        var increment = 5;
+        if (!isUser) {
+            this.drawMessage(hudX, (player.y + increment), player.id);
+            increment += 12.5;
+        }
+
+        if (player.message.id && player.message.text) {
+            this.drawMessage(hudX, (player.y - increment), player.message.text);
+            if ($("#" + player.message.id).length == 0) {
+                $("#messageHistory").append("<div id='" + player.message.id + "' class='historicMessage'>" + player.id + ": " + player.message.text + "</div>");
+            }
+        }
+
+        var healthWidth = 50;
+        this.drawHealth((hudX - (healthWidth / 2)), (player.y + (object.getHeight() * object.getScale())) + 7, player.health, healthWidth);
+    }
+
     drawObject (x: number, y: number, avatar: string, facing: string, frame: number)
     {
         var width = 24;

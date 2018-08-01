@@ -1,5 +1,5 @@
 class User {
-    constructor (username, session, world, sql) {
+    constructor (username, session, world, sql, callback) {
         this.session = session;
 
         this.world = world;
@@ -23,12 +23,12 @@ class User {
 
         this.loaded = false;
 
-        this.loadUser(username);
-
         this.respawn();
+
+        this.loadUser(username, callback);
     };
 
-    loadUser (username) {
+    loadUser (username, callback) {
         var user = this;
         user.id = username;
 
@@ -60,9 +60,11 @@ class User {
                 user[key] = record[key];
             }
             user.loaded = true;
+
+            callback();
         })
         .catch((error)  =>  {
-            console.log(error.message);
+            console.log(error);
         });
     };
 
@@ -225,7 +227,7 @@ class User {
 
                         callback(true, "Sucessful Drop");
                     }).catch((error) =>  {
-                        callback(false, error.message);
+                        callback(false, error);
                     })
                 } else if (update == 0) {
                     self.sql.delete("inventories", {
@@ -235,11 +237,11 @@ class User {
 
                         callback(true, "Sucessful Drop");
                     }).catch(() =>  {
-                        callback(false, error.message);
+                        callback(false, error);
                     });
                 }
             }).catch((error)    =>  {
-                callback(false, error.message);
+                callback(false, error);
             });
     };
 
@@ -294,7 +296,9 @@ class User {
 
     save (callback) {
         var self = this;
-
+        if (!self.loaded) {
+            return;
+        }
         var params = {"username"    :   this.id};
 
         this.sql.update("users", params, {

@@ -17,26 +17,27 @@ serve.getIo().sockets.on("connection", (socket)  =>  {
 
         var username = form.username.toLowerCase();
 
-        var user = new (require("./src/User"))(username, session, world, sql);
-
         session.login(username, form.password, (status, message) => {
             // If we have sucessfully logged in, start the game listeners.
             if (status) {
-                world.addSession(session, user);
+                var user = new (require("./src/User"))(username, session, world, sql, ()    =>  {
+                    world.addSession(session, user);
 
-                var game = new (require("./src/Game"))(username, world);
-                game.start();
+                    var game = new (require("./src/Game"))(username, world);
+                    game.start();
 
-                socket.on("logout", ()  =>  {
-                    game.stop();
+                    socket.on("logout", ()  =>  {
+                        game.stop();
 
-                    world.logout(session);
+                        world.logout(session);
 
-                    // Since we can login and logout in the same session
-                    // We need to remove the logout listener each time
-                    // The login listener is called.
-                    socket.removeAllListeners("logout");
+                        // Since we can login and logout in the same session
+                        // We need to remove the logout listener each time
+                        // The login listener is called.
+                        socket.removeAllListeners("logout");
+                    });
                 });
+
             }
 
             callback(status, message);

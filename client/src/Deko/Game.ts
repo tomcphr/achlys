@@ -1,5 +1,6 @@
 import {World} from "./World";
 import {Inventory} from "./Inventory";
+import {RenderEngine} from "./RenderEngine";
 
 export class Game
 {
@@ -28,48 +29,63 @@ export class Game
         ctx.textAlign = "center";
 
         var world = new World(this.socket, ctx);
+        var engine = new RenderEngine(ctx, self.width, self.height);
         this.socket.on("details", function (data) {
             ctx.clearRect(0, 0, self.width, self.height);
 
-            var logged = data.logged;
+            let logged = data.logged;
             if (!logged) {
                 return;
             }
-            var players = data.players;
-            for (var i = 0; i < players.length; i++) {
-                var player = players[i];
 
-                var object = world.drawObject(player.x, player.y, player.avatar, player.facing, player.frame);
+            let players = data.players;
 
-                var hudX = (player.x + ((object.getWidth() * object.getScale()) / 2));
-
-                var increment = 5;
-                if (player.id != logged) {
-                    world.drawMessage(hudX, (player.y + increment), player.id);
-                    increment += 12.5;
-                }
-
-                if (player.message.id && player.message.text) {
-                    world.drawMessage(hudX, (player.y - increment), player.message.text);
-                    if ($("#" + player.message.id).length == 0) {
-                        $("#messageHistory").append("<div id='" + player.message.id + "' class='historicMessage'>" + player.id + ": " + player.message.text + "</div>");
-                    }
-                }
-
-                var healthWidth = 50;
-                world.drawHealth((hudX - (healthWidth / 2)), (player.y + (object.getHeight() * object.getScale())) + 7, player.health, healthWidth);
+            let currentPlayer = players[logged];
+            if (!currentPlayer.loaded) {
+                return;
             }
 
-            var items = data.items;
-            for (var i = 0; i < items.length; i++) {
-                var item = items[i];
+            let globalX = ((self.width / 2) - currentPlayer.x);
+            let globalY = ((self.height / 2) - currentPlayer.y);
+
+            engine.render(data.world.tiles, globalX, globalY);
+
+            // Draw all of the other players
+            for (let id in players) {
+                let otherPlayer = players[id];
+                if (!otherPlayer.loaded) {
+                    continue;
+                }
+
+                let isUser = (id === logged);
+                if (isUser) {
+                    continue;
+                }
+
+                otherPlayer.x = globalX + otherPlayer.x;
+                otherPlayer.y = globalY + otherPlayer.y;
+
+                world.drawPlayer(otherPlayer, false);
+            }
+
+            let items = data.items;
+            for (let i = 0; i < items.length; i++) {
+                let item = items[i];
+
+                item.x = globalX + item.x;
+                item.y = globalY + item.y;
 
                 world.drawItem(item.x, item.y, item.id);
             }
+
+            let clientPlayer = Object.assign({}, currentPlayer);
+            clientPlayer.x = self.width / 2;
+            clientPlayer.y = self.height / 2;
+            world.drawPlayer(clientPlayer, true);
         });
 
-        var inventory = new Inventory(this.socket);
-        var invenDialog = inventory.class;
+        let inventory = new Inventory(this.socket);
+        let invenDialog = inventory.class;
         $("#inventoryButton").click(function () {
             if (!$(invenDialog).is(":visible")) {
                 inventory.open();
@@ -89,11 +105,11 @@ export class Game
         var self = this;
 
         window.onkeydown = function (event) {
-            var enteringText = $("#messageText").is(":focus");
+            let enteringText = $("#messageText").is(":focus");
             if (enteringText) {
                 return;
             }
-            var type = self.pressKey(event.keyCode);
+            let type = self.pressKey(event.keyCode);
             self.socket.emit("keys", {
                 "type"  :   type,
                 "state" :   true,
@@ -101,7 +117,7 @@ export class Game
         }
 
         window.onkeyup = function (event) {
-            var type = self.pressKey(event.keyCode);
+            let type = self.pressKey(event.keyCode);
             self.socket.emit("keys", {
                 "type"  :   type,
                 "state" :   false,
