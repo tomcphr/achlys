@@ -16,18 +16,31 @@ class World {
 
         var update = () =>  {
             var packet = {
-                "players"   :   [],
+                "world"     :   {
+                    "width"     :   self.width,
+                    "height"    :   self.height,
+                    "tiles"     :   {
+                        "0": [0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1],
+                        "1": [0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1],
+                        "2": [0, 0, 0, 0, 1, 0, 1, 0, 1, 1, 0, 1],
+                        "3": [0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1],
+                        "4": [1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1],
+                        "5": [0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1]
+                    }
+                },
+                "players"   :   {}
             };
 
             for (var s in self.sessions) {
                 var session = self.sessions[s];
-
-                var user = self.updateUser(session);
-                if (!user) {
+                if (!session.user) {
                     continue;
                 }
 
-                packet.players.push({
+                var user = self.updateUser(session);
+
+                packet.players[user.id] = {
+                    "loaded"    :   user.loaded,
                     "id"        :   user.id,
                     "health"    :   user.health,
                     "avatar"    :   user.avatar,
@@ -39,7 +52,7 @@ class World {
                         "id"        :   user.message.id,
                         "text"      :   user.message.text,
                     },
-                });
+                };
             }
 
             packet["items"] = self.getDroppedItems();
@@ -57,13 +70,9 @@ class World {
     };
 
     updateUser (session) {
-        if (!session.user) {
-            return;
-        }
-
         var user = session.user;
         if (!user.loaded) {
-            return;
+            return user;
         }
 
         var keys = session.getKeys();
@@ -142,12 +151,19 @@ class World {
 
     logout (session) {
         var self = this;
-        if (!session.user) {
-            self.removeSession(session);
+
+        var id = session.id;
+        if (!(id in this.sessions)) {
             return;
         }
 
-        session.user.save(()    =>  {
+        if (!("user" in this.sessions[id])) {
+            self.removeSession(session);
+            return;
+        }
+        var user = this.sessions[id].user;
+
+        user.save(()    =>  {
             self.removeSession(session);
         });
     };
