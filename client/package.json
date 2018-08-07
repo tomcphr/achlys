@@ -1,26 +1,20 @@
 {
   "name": "achlys",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "dependencies": {
-    "@types/jquery": "^3.3.2",
-    "@types/jqueryui": "^1.12.2",
-    "@types/node": "9.6.7",
-    "@types/socket.io": "^1.4.33",
-    "@types/socket.io-client": "^1.4.32",
-    "email-validator": "^2.0.4",
-    "socket.io": "^2.1.0",
-    "ts-loader": "^4.3.0",
-    "typescript": "^2.8.3",
-    "webpack": "^4.9.1",
-    "webpack-cli": "^2.1.4"
-  },
-  "scripts": {
-    "compile": "./node_modules/.bin/webpack --config webpack.config.js",
-    "watch": "./node_modules/.bin/webpack --config webpack.config.js --watch"
+    "phaser": "^3.11.0",
+    "socket.io-client": "^2.1.1",
+    "webpack": "^4.16.5"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/tomcphr/achlys.git"
   },
-  "author": "tomcphr"
+  "scripts": {
+    "compile": "./node_modules/.bin/webpack"
+  },
+  "author": "tomcphr",
+  "devDependencies": {
+    "webpack-command": "^0.4.1"
+  }
 }

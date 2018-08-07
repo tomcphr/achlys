@@ -49,6 +49,11 @@ class Session {
         this.sql.record("users", {"username": username})
             .then((record) => {
                 if (record) {
+                    if (!record.active) {
+                        callback(false, "User account inactive");
+                        return;
+                    }
+
                     self.encryption.compare(password, record.password)
                         .then((match)   =>  {
                             if (match) {
@@ -121,8 +126,8 @@ class Session {
                                     }).then(()  =>  {
                                         self.sql.insert("positions", {
                                             "username"  :   username,
-                                            "x"         :   self.world.getRandomX(),
-                                            "y"         :   self.world.getRandomY(),
+                                            "x"         :   0,
+                                            "y"         :   0,
                                             "facing"    :   "down"
                                         }).catch((error)  =>  {
                                             self.sql.delete("users", {"username": username});

@@ -1,14 +1,10 @@
 class World {
-    constructor () {
+    constructor (map) {
         this.sessions = {};
 
         this.items = {};
 
-        this.width = 960;
-
-        this.height = 600;
-
-        this.tiles = new (require("./Tiles"))();
+        this.map = map;
     };
 
     tick () {
@@ -16,11 +12,6 @@ class World {
 
         var update = () =>  {
             var packet = {
-                "world"     :   {
-                    "width"     :   self.width,
-                    "height"    :   self.height,
-                    "tiles"     :   self.tiles.getMap("overworld")
-                },
                 "players"   :   {}
             };
 
@@ -50,6 +41,8 @@ class World {
 
             packet["items"] = self.getDroppedItems();
 
+            packet["world"] = self.map;
+
             // Send the details of the world to every session
             for (var s in self.sessions) {
                 var session = self.sessions[s];
@@ -59,7 +52,13 @@ class World {
                 session.getSocket().emit("details", packet);
             };
         };
-        setInterval(update, 1000 / 30);
+        let interval = setInterval(update, 1000 / 30);
+
+        return interval;
+    };
+
+    getTileMap () {
+        return this.map;
     };
 
     updateUser (session) {
@@ -91,7 +90,7 @@ class World {
             }
         }
 
-        user.position(keys);
+        user.position();
 
         user.animation();
         if (user.health <= 0) {
@@ -112,6 +111,23 @@ class World {
         return user;
     };
 
+    getUsersAtXY (x, y) {
+        let users = [];
+        for (var session in this.sessions) {
+            var session = this.sessions[session];
+
+            var user = session.user;
+            if (!user) {
+                continue;
+            }
+
+            if (user.x == x && user.y == y) {
+                users.push(session);
+            }
+        }
+        return users;
+    };
+
     getDroppedItems () {
         var items = [];
         for (var i in this.items) {
@@ -122,55 +138,6 @@ class World {
             items.push(item);
         }
         return items;
-    };
-
-    getTiles () {
-        return this.tiles;
-    };
-
-    addSession (session, user) {
-        var id = session.id;
-
-        session["user"] = user;
-
-        this.sessions[id] = session;
-    };
-
-    removeSession (session) {
-        var id = session.id;
-
-        delete this.sessions[id];
-    };
-
-    logout (session) {
-        var self = this;
-
-        var id = session.id;
-        if (!(id in this.sessions)) {
-            return;
-        }
-
-        if (!("user" in this.sessions[id])) {
-            self.removeSession(session);
-            return;
-        }
-        var user = this.sessions[id].user;
-
-        user.save(()    =>  {
-            self.removeSession(session);
-        });
-    };
-
-    getRandomX () {
-        var randomX = Math.random() * (this.width - 0) + 0;
-
-        return Math.ceil(randomX / 32) * 32;
-    };
-
-    getRandomY () {
-        var randomY = Math.random() * (this.height - 0) + 0;
-
-        return Math.ceil(randomY / 32) * 32;
     };
 
     getUserSession (username) {
@@ -188,6 +155,20 @@ class World {
         }
 
         return false;
+    };
+
+    addSession (session, user) {
+        var id = session.id;
+
+        session["user"] = user;
+
+        this.sessions[id] = session;
+    };
+
+    removeSession (session) {
+        var id = session.id;
+
+        delete this.sessions[id];
     };
 
     addDrop (item, name, quantity, x, y) {
@@ -254,6 +235,25 @@ class World {
         }
 
         return false;
+    };
+
+    logout (session) {
+        var self = this;
+
+        var id = session.id;
+        if (!(id in this.sessions)) {
+            return;
+        }
+
+        if (!("user" in this.sessions[id])) {
+            self.removeSession(session);
+            return;
+        }
+        var user = this.sessions[id].user;
+
+        user.save(()    =>  {
+            self.removeSession(session);
+        });
     };
 }
 module.exports = World;

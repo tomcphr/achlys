@@ -7,13 +7,15 @@ class User {
         this.sql = sql;
 
         this.moderator = 0;
-        this.width = 48;
-        this.height = 64;
+        this.width = 32;
+        this.height = 32;
         this.avatar = "M";
         this.facing = "down";
         this.frame = 1;
         this.walking = false;
-        this.speed = 8;
+        this.speed = 4;
+
+        this.path = [];
 
         this.message = {
             "id"        :   "",
@@ -38,15 +40,13 @@ class User {
             "health"        :   "a.health",
             "x"             :   "b.x",
             "y"             :   "b.y",
-            "targetX"       :   "b.x",
-            "targetY"       :   "b.y",
             "facing"        :   "b.facing",
         };
 
         var query = [
             "SELECT " + Object.values(fields).join(","),
             "FROM users a",
-            "JOIN positions b ON b.username = a.username",
+            "LEFT OUTER JOIN positions b ON b.username = a.username",
             "WHERE a.?",
             "LIMIT 1",
         ];
@@ -57,6 +57,12 @@ class User {
         }).then((records)    =>  {
             var record = records[0];
             for (var key in fields) {
+                if (key == "x" || key == "y") {
+                    if (!record[key]) {
+                        this.respawn();
+                        continue;
+                    }
+                }
                 user[key] = record[key];
             }
             user.loaded = true;
@@ -69,33 +75,73 @@ class User {
     };
 
     respawn () {
-        this.x = this.world.getRandomX();
-        this.y = this.world.getRandomY();
-        this.targetX = this.x;
-        this.targetY = this.y;
+        let tilemap = this.world.getTileMap();
+
+        let positions = [];
+        for (var row = 0; row < tilemap.length; row++) {
+            for (var col = 0; col < tilemap[row].length; col++) {
+                let tile = tilemap[row][col];
+                if (tile == 0) {
+                    continue;
+                }
+
+                positions.push({
+                    "x"     :   col * 32,
+                    "y"     :   row * 32,
+                });
+            }
+        }
+        let random = positions[positions.length * Math.random() | 0];
+
+        this.x = random.x;
+        this.y = random.y;
+
         this.health = 100;
     };
 
-    position (keys) {
-        if (keys.right) {
-            this.x += this.speed;
-            if (this.x > this.targetX) {
-                this.targetX += 32;
+    position () {
+        this.walking = false;
+        if (this.path.length) {
+            let target = this.path[0];
+
+            if (target.y < this.y) {
+                // up
+                this.facing = "up";
+                if ((this.y - this.speed) < target.y) {
+                    this.y = target.y;
+                } else {
+                    this.y -= this.speed;
+                }
+            } else if (target.y > this.y) {
+                // down
+                this.facing = "down";
+                if ((this.y + this.speed) > target.y) {
+                    this.y = target.y;
+                } else {
+                    this.y += this.speed;
+                }
+            } else if (target.x > this.x) {
+                // right
+                this.facing = "right";
+                if ((this.x + this.speed) > target.x) {
+                    this.x = target.x;
+                } else {
+                    this.x += this.speed;
+                }
+            } else if (target.x < this.x) {
+                // left
+                this.facing = "left";
+                if ((this.x - this.speed) < target.x) {
+                    this.x = target.x;
+                } else {
+                    this.x -= this.speed;
+                }
             }
-        } else if (keys.left) {
-            this.x -= this.speed;
-            if (this.x < this.targetX) {
-                this.targetX -= 32;
-            }
-        } else if (keys.up) {
-            this.y -= this.speed;
-            if (this.y < this.targetY) {
-                this.targetY -= 32;
-            }
-        } else if (keys.down) {
-            this.y += this.speed;
-            if (this.y > this.targetY) {
-                this.targetY += 32;
+
+            this.walking = true;
+            if (this.x == target.x && this.y == target.y) {
+                this.path.shift();
+                this.walking = false;
             }
         }
     };
@@ -197,10 +243,8 @@ class User {
                     return;
                 }
 
-                var tiles = self.world.getTiles();
-
-                var tileWidth = tiles.getWidth();
-                var tileHeight = tiles.getHeight();
+                var tileWidth = 32;
+                var tileHeight = 32;
 
                 switch (facing) {
                     case "left":

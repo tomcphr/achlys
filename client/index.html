@@ -1,110 +1,13 @@
 <!DOCTYPE html>
 <head>
-    <script
-        src='https://code.jquery.com/jquery-3.3.1.min.js'
-        integrity='sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8='
-        crossorigin='anonymous'></script>
-    <script
-        src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
-        integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
-        crossorigin="anonymous"></script>
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery-impromptu/6.2.3/jquery-impromptu.min.js'></script>
-    <link rel='stylesheet' type='text/css' href='https://code.jquery.com/ui/1.12.1/themes/black-tie/jquery-ui.css'>
-    <link rel='stylesheet' type='text/css' href='https://cdnjs.cloudflare.com/ajax/libs/jquery-impromptu/6.2.3/jquery-impromptu.min.css'>
     <link rel='stylesheet' type='text/css' href='css/index.css'>
-    <script src='https://cdn.socket.io/socket.io-1.4.5.js'></script>
-    <script src='js/index.js'></script>
+    <script src='js/sockets.js'></script>
+    <script src='js/phaser.js'></script>
+    <script src='dist/main.js'></script>
 </head>
 <body>
-    <div id='gameContainer'>
-        <div id='interface'>
-            <div id='loginDialog'>
-                <div
-                    id='html_login'
-                    class='hidden dialogHtml'
-                >
-                    <div class='textCenter fullWidth'>
-                        <label for='loginUsername'>Username:</label>
-                        <br>
-                        <input type='text' class='textCenter' id='loginUsername'>
-                    </div>
-                    <br>
-                    <div class='textCenter fullWidth'>
-                        <label for='loginPassword'>Password:</label>
-                        <br>
-                        <input type='password' class='textCenter' id='loginPassword'>
-                    </div>
-                    <br>
-                </div>
-                <div
-                    id='html_register'
-                    class='hidden dialogHtml'
-                >
-                    <div class='fullWidth' style='height: 50%;'>
-                        <div class='textCenter fullWidth'>
-                            <label for='registerEmail'>Email:</label>
-                            <br>
-                            <input type='text' class='textCenter' id='registerEmail'>
-                        </div>
-                        <br>
-                        <div class='textCenter fullWidth'>
-                            <label for='registerUsername'>Username:</label>
-                            <br>
-                            <input type='text' class='textCenter' id='registerUsername'>
-                        </div>
-                        <br>
-                        <div class='textCenter fullWidth'>
-                            <label for='registerPassword'>Password:</label>
-                            <br>
-                            <input type='password' class='textCenter' id='registerPassword'>
-                        </div>
-                    </div>
-                    <br>
-                    <div style='width: 60%; height: 50%;' class='fCenter'>
-                        <div class='fLeft' style='width: 48%; height: 100%;display: inline-block;'>
-                            <div style='height: 50%;'>Avatar:</div>
-                            <div style='height: 50%;'>
-                                <select id='avatarSelect' name='registerAvatar' class='fullWidth'>
-                                    <option value='M'>1</option>
-                                    <option value='F'>2</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class='fRight' style='width: 48%; height: 100%; border: 1px solid #000; display: inline-block;'>
-                            <img id='avatarImage' class='fCenter' src='/img/register/M.png' width='48' height='64'></img>
-                        </div>
-                    </div>
-                    <br>
-                </div>
-            </div>
-            <div id='inventoryDialog' class='hidden'>
-                <div id='inventoryItems' class='fullWidth'>
-                    <div id='templateItem' class='hidden'>
-                        <div class='itemContainer' data-item='' data-name='' style='width: 40px; border: 1px solid #000; display: inline-block; margin: 5px;'>
-                            <img class='itemImage' style='padding-right: 2px; padding-left: 2px; padding-top: 2px; margin-bottom: 1px; border-bottom: 0.1px solid #000;' src=''>
-                            <div class='itemQuantity' style='text-align: center; font-size: 12px; padding-bottom: 2px;'></div>
-                        </div>
-                    </div>
-                </div>
-                <div id='inventoryContext'>
-                    <ul class='contextItems'>
-                        <li class='contextOption' data-action='D'>Drop</li>
-                    </ul>
-                </div>
-            </div>
-            <div id='uiOverlay' class='hidden'>
-                <div id='userName'></div>
-                <button id='logoutButton' class='fRight'>Logout</button>
-                <button id='inventoryButton'>Inventory</button>
-                <div id='messageContainer'>
-                    <div id='messageHistory'></div>
-                    <input type='text' name='message' id='messageText'>
-                    <span id='sendContainer'>
-                        <button id='sendMessage'>Send</button>
-                    </span>
-                </div>
-            </div>
-        </div>
-        <canvas id='ctx' width='960' height='600'></canvas>
-    </div>
+    <noscript>
+        <strong>We're sorry but this site doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
+    </noscript>
+    <div id='gameContainer'></div>
 </body>

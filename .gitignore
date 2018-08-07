@@ -61,4 +61,5 @@ typings/
 # Pesky package-lock file
 package-lock.json
 
-client/js/*
+# Client dist
+client/dist/

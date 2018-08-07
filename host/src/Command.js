@@ -30,6 +30,14 @@ class Command {
         this[key].apply(this, params);
     };
 
+    kick (username) {
+        var userSession = this.world.getUserSession(username);
+        if (!userSession) {
+            return;
+        }
+        this.world.logout(userSession);
+    };
+
     kill (username) {
         var userSession = this.world.getUserSession(username);
         if (!userSession) {

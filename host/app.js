@@ -1,9 +1,22 @@
-let sql = new (require("./src/Sql"))();
+let sql = require("node-mysql-helper");
+
+let json = (require("fs")).readFileSync(__dirname + "/database.json");
+let database = JSON.parse(json).dev;
+
+let mapFile = (require("fs")).readFileSync(__dirname + "/map.json");
+let map = JSON.parse(mapFile).tiles;
+
+sql.connect({
+    host        :   database.host,
+    user        :   database.user,
+    password    :   database.password,
+    database    :   database.database
+});
 
 let serve = new (require("./src/Serve"))();
 serve.listen();
 
-let world = new (require("./src/World"))();
+let world = new (require("./src/World"))(map);
 world.tick();
 
 serve.getIo().sockets.on("connection", (socket)  =>  {

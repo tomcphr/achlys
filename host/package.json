@@ -1,13 +1,17 @@
 {
   "name": "achlys",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "",
   "main": "app.js",
   "dependencies": {
     "bcrypt": "^2.0.1",
+    "db-migrate": "^0.11.3",
+    "db-migrate-mysql": "^1.1.10",
     "email-validator": "^2.0.4",
     "express": "^4.16.3",
+    "mysql": "^2.16.0",
     "node-mysql-helper": "^0.6.7",
+    "pathfinding": "^0.4.18",
     "socket.io": "^2.1.0"
   },
   "repository": {

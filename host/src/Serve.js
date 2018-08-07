@@ -22,8 +22,20 @@ class Serve {
             response.sendFile(location);
         });
 
-        server.use("/js", this.express.static(above + "/client/js"));
-        server.use("/img", this.express.static(above + "/client/img"));
+        server.get("/js/sockets.js", function (request, response) {
+            var location = above + "/client/node_modules/socket.io-client/dist/socket.io.slim.js";
+
+            response.sendFile(location);
+        })
+
+        server.get("/js/phaser.js", function (request, response) {
+            var location = above + "/client/node_modules/phaser/dist/phaser.js";
+
+            response.sendFile(location);
+        });
+
+        server.use("/dist", this.express.static(above + "/client/dist"));
+        server.use("/tilesets", this.express.static(above + "/client/assets/tilesets"));
         server.use("/css", this.express.static(above + "/client/css"));
 
         return server;
