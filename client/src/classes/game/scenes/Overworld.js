@@ -160,6 +160,7 @@ class Overworld extends Phaser.Scene {
                 "items",
                 (item.id - 1),
             );
+            sprite.setOrigin(0, 0);
 
             group.add(sprite);
         }

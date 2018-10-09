@@ -56,11 +56,14 @@ class Game {
     };
 
     drop (item, name, quantity, callback) {
+        let self = this;
         this.user.drop(item, name, quantity, (status, message)  =>  {
             if (!status) {
                 console.log(message);
                 return;
             }
+
+            self.session.getSocket().emit("updated-items");
 
             callback();
         })

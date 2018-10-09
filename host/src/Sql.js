@@ -8,9 +8,9 @@ class Sql {
     };
 
     getConnection () {
-        let self = this;
+        var self = this;
 
-        let promise = this.q.promise((resolve, reject) =>  {
+        var promise = this.q.promise((resolve, reject) =>  {
             if (!self || !self.pool) {
                 return reject(new Error("Something went wrong"));
             }
@@ -26,11 +26,11 @@ class Sql {
     };
 
     query (query, params) {
-        let self = this;
+        var self = this;
 
-        let promise = this.q.promise((resolve, reject)  =>  {
+        var promise = this.q.promise((resolve, reject)  =>  {
             self.getConnection().then((connection)    =>  {
-                let results = connection.query(query, params, (error, data)    =>  {
+                var results = connection.query(query, params, (error, data)    =>  {
                     connection.release();
 
                     if (error) {
@@ -48,11 +48,11 @@ class Sql {
     };
 
     getWhere (params) {
-        let query = [];
-        let values = [];
+        var query = [];
+        var values = [];
 
-        for (let clause in params) {
-            let field = this.mysql.escapeId(clause);
+        for (var clause in params) {
+            var field = this.mysql.escapeId(clause);
 
             values.push(params[clause]);
 
@@ -63,7 +63,7 @@ class Sql {
         // Remove the last AND statement in the where clause
         query = query.slice(0, -1);
 
-        let data = {
+        var data = {
             query: query,
             values: values
         };
@@ -72,28 +72,26 @@ class Sql {
     };
 
     record (table, params) {
-        let self = this;
+        var self = this;
 
-        let promise = this.q.promise((resolve, reject) =>  {
+        var promise = this.q.promise((resolve, reject) =>  {
             if (!(params instanceof Object)) {
                 return resolve(null);
             }
 
-            let query = [
+            var where = self.getWhere(params);
+
+            var query = [
                 "SELECT * FROM ",
                 self.mysql.escapeId(table),
                 "WHERE",
             ];
-
-            let where = self.getWhere(params);
-
             query = query.concat(where.query);
-
             query = query.join(" ");
 
             self.query(query, where.values)
                 .then((data)    =>  {
-                    let length = data.length;
+                    var length = data.length;
                     switch (length) {
                         case 0:
                             resolve(null);
@@ -110,7 +108,7 @@ class Sql {
     };
 
     insert (table, record) {
-        let query = [
+        var query = [
             "INSERT INTO",
             this.mysql.escapeId(table),
             "SET ?",
@@ -122,17 +120,17 @@ class Sql {
     };
 
     update (table, params, update) {
-        let query = [
+        var query = [
             "UPDATE",
             this.mysql.escapeId(table),
             "SET",
         ];
 
-        let values = [];
-        for (let clause in update) {
-            let value = update[clause];
+        var values = [];
+        for (var clause in update) {
+            var value = update[clause];
 
-            let field = this.mysql.escapeId(clause);
+            var field = this.mysql.escapeId(clause);
 
             query.push(field + " = ?");
             query.push(",");
@@ -144,7 +142,7 @@ class Sql {
 
         query.push("WHERE");
 
-        let where = this.getWhere(params);
+        var where = this.getWhere(params);
         query = query.concat(where.query);
         values = values.concat(where.values);
 
@@ -155,9 +153,9 @@ class Sql {
 
     updateOrInsert (table, params, update)
     {
-        let insert = Object.assign(params, update);
+        var insert = Object.assign(params, update);
 
-        let query = [
+        var query = [
             "INSERT INTO",
             this.mysql.escapeId(table),
             "SET ?",
@@ -165,19 +163,19 @@ class Sql {
             "UPDATE ?",
         ].join(" ");
 
-        let values = [insert, update];
+        var values = [insert, update];
 
         return this.query(query, values);
     }
 
     delete (table, params) {
-        let query = [
+        var query = [
             "DELETE FROM",
             this.mysql.escapeId(table),
             "WHERE",
         ];
 
-        let where = this.getWhere(params);
+        var where = this.getWhere(params);
 
         query = query.concat(where.query);
 

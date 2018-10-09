@@ -220,7 +220,12 @@ class User {
                     "quantity"  :   quantity
                 }).then(()  =>  {
                     self.session.getSocket().emit("updated-items");
+                }).catch((error) =>  {
+                    console.log(error);
                 });
+            })
+            .catch((error)   =>  {
+                console.log(error);
             });
     };
 
@@ -257,17 +262,15 @@ class User {
                 switch (facing) {
                     case "left":
                         x -= tileWidth;
-                        y += (height - tileHeight);
                         break;
                     case "right":
                         x += width;
-                        y += (height - tileHeight);
                         break;
                     case "up":
                         y -= tileHeight;
                         break;
                     case "down":
-                        y += ((height) + tileHeight);
+                        y += height;
                         break;
                 }
 

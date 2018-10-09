@@ -28,11 +28,15 @@ CREATE TABLE `items` (
     `id` INT NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(50) NOT NULL,
     `description` VARCHAR(256) NOT NULL,
+    `tradable` INT NOT NULL,
+    `equipable` INT NOT NULL,
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB;
 
-INSERT INTO `items` (name, description)
-VALUES ("9000", "It's not over 9000");
+INSERT INTO `items` (name, description, tradable, equipable)
+VALUES
+("Coins", "Lovely Money!", 1, 0),
+("Blade of Eben", "A sharp, distinctive blade", 0, 1);
 
 CREATE TABLE `inventories` (
     `id` INT NOT NULL AUTO_INCREMENT,
@@ -43,4 +47,6 @@ CREATE TABLE `inventories` (
 ) ENGINE = InnoDB;
 
 INSERT INTO `inventories` (username, item, quantity)
-VALUES ("test_1", 1, 1);
+VALUES
+("test_1", 1, 2147483647),
+("test_2", 2, 1);

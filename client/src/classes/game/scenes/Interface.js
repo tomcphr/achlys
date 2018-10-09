@@ -7,8 +7,21 @@ class Interface extends Phaser.Scene {
 
     create (config)
     {
-        let inventory = new Inventory(this, config);
-        inventory.open();
+        this.inventory = new Inventory(this, config);
+
+        let inventory = this.inventory;
+        this.input.keyboard.on("keyup", (event)  =>  {
+            // If the user has pressed the letter I
+            if (event.keyCode == 73) {
+                let displayed = inventory.isDisplayed();
+
+                if (displayed) {
+                    inventory.close();
+                } else {
+                    inventory.open();
+                }
+            }
+        });
     }
 }
 
