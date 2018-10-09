@@ -82,10 +82,6 @@ class Game {
         }
 
         if (data.type === "right") {
-            //let users = this.world.getUsersAtXY(data.x, data.y);
-            //this.session.emit("contextmenu", {
-            //
-            //})
             return;
         }
 

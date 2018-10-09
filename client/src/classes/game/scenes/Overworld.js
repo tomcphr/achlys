@@ -68,22 +68,6 @@ class Overworld extends Phaser.Scene {
             this.items(this, items, data.items);
         }).bind(this));
 
-        this.input.keyboard.on("keydown", ((event)   =>  {
-            let key = this.getKey(event.keyCode);
-            config.socket.emit("keys", {
-                "type"  :   key,
-                "state" :   true,
-            });
-        }).bind(this));
-
-        this.input.keyboard.on("keyup", ((event)   =>  {
-            let key = this.getKey(event.keyCode);
-            config.socket.emit("keys", {
-                "type"  :   key,
-                "state" :   false,
-            });
-        }).bind(this));
-
         // Set the camera to zoom
         this.cameras.main.setZoom(1.5);
     }
@@ -178,34 +162,6 @@ class Overworld extends Phaser.Scene {
             );
 
             group.add(sprite);
-        }
-    }
-
-
-    getKey (keyCode)
-    {
-        switch (keyCode) {
-            case 68:
-            case 39:
-                return "right";
-
-            case 83:
-            case 40:
-                return "down";
-
-            case 65:
-            case 37:
-                return "left";
-
-            case 87:
-            case 38:
-                return "up";
-
-            case 32:
-                return "space";
-
-            default:
-                return 0;
         }
     }
 }
