@@ -55,13 +55,21 @@ class User {
         this.sql.query(query, {
             "username"  :   username
         }).then((records)    =>  {
-            var record = records[0];
+            // We should really error here.
+            if (records.length > 1) {
+                return;
+            }
+
+            let record = records[0];
             for (var key in fields) {
                 if (key == "x" || key == "y") {
                     if (!record[key]) {
                         this.respawn();
                         continue;
                     }
+                }
+                if (!record[key]) {
+                    continue;
                 }
                 user[key] = record[key];
             }
@@ -348,15 +356,21 @@ class User {
         this.sql.update("users", params, {
             "health"    :   self.health
         }).then(()  =>  {
-            this.sql.update("positions", params, {
+            let update = {
                 "x"         :   self.x,
                 "y"         :   self.y,
                 "facing"    :   self.facing
-            }).then(()   =>  {
-                if (callback) {
-                    callback();
-                }
-            });
+            };
+            this.sql.updateOrInsert("positions", params, update)
+                .then(()   =>  {
+                    if (callback) {
+                        callback();
+                    }
+                }).catch((error) =>  {
+                    console.log("Something went wrong updating the user's positions:", error);
+                });
+        }).catch((error)    =>  {
+            console.log("Something went wrong updating the user's health:", error);
         });
     };
 }
