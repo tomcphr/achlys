@@ -1,3 +1,4 @@
+import Chat from "../Chat";
 import Inventory from "../Inventory";
 
 class Interface extends Phaser.Scene {
@@ -5,23 +6,38 @@ class Interface extends Phaser.Scene {
         super();
     }
 
+    preload () {
+        this.load.image("inventoryButton", "gui/inventory-button.png");
+    }
+
     create (config)
     {
-        this.inventory = new Inventory(this, config);
+        this.inventory(config);
 
-        let inventory = this.inventory;
-        this.input.keyboard.on("keyup", (event)  =>  {
-            // If the user has pressed the letter I
-            if (event.keyCode == 73) {
-                let displayed = inventory.isDisplayed();
+        this.chat(config);
+    }
 
-                if (displayed) {
-                    inventory.close();
-                } else {
-                    inventory.open();
-                }
+    inventory (config)
+    {
+        let inventory = new Inventory(this, config);
+
+        let invX = this.game.config.width - 25;
+        let invY = this.game.config.height - 25;
+
+        let invButton = this.add.image(invX, invY, "inventoryButton")
+        .setInteractive({useHandCursor: true})
+        .on("pointerdown", ()   =>  {
+            if (inventory.displayed) {
+                inventory.close();
+                return;
             }
+            inventory.open();
         });
+    }
+
+    chat (config)
+    {
+        let chat = new Chat(this, config);
     }
 }
 

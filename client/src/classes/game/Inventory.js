@@ -12,9 +12,7 @@ class Inventory {
             appendTo: "#gameContainer",
             resizable: false,
             width: 480,
-            height: 300,
-            hide: { effect: "fade", duration: 800 },
-            show: { effect: "fade", duration: 800 },
+            height: 300
         });
 
         $("#ui-inventory").dialog("widget").draggable("option", "containment", "#gameContainer");
@@ -22,10 +20,6 @@ class Inventory {
         $(window).resize(function() {
             $("#ui-inventory").dialog("option", "position", {my: "center", at: "center", of: window});
         });
-    };
-
-    isDisplayed () {
-        return this.displayed;
     };
 
     open () {
@@ -37,6 +31,7 @@ class Inventory {
                 inventory += "<div id='detailName'></div>";
                 inventory += "<div id='detailText'></div>";
                 inventory += "<div id='detailActions'>";
+                    inventory += "<input type='number' id='quantitySelect' min='0'>"
                     inventory += "<button id='dropItem'>Drop</button>";
                 inventory += "</div>";
             inventory += "</div>";
@@ -46,13 +41,16 @@ class Inventory {
         var self = this;
         this.updateInventory();
         this.config.socket.on("updated-items", function () {
+            $("#itemDetail").hide();
+            $("#itemHolder").css("width", "97%");
             self.updateInventory();
         });
 
         $(document).on("click", ".itemContainer", function () {
+            let record = $(this).attr("data-record");
+            let item = $(this).attr("data-item");
             let name = $(this).attr("data-name");
             let description = $(this).attr("data-description");
-            let item = $(this).attr("data-id");
             let quantity = $(this).attr("data-quantity");
 
             $("#detailText").html(description);
@@ -60,9 +58,9 @@ class Inventory {
 
             $("#equipItem").attr("data-item", item);
 
-            $("#dropItem").attr("data-name", name);
-            $("#dropItem").attr("data-item", item);
-            $("#dropItem").attr("data-quantity", quantity);
+            $("#dropItem").attr("data-record", record);
+
+            $("#quantitySelect").val(quantity);
 
             let visible = $("#itemDetail").is(":visible");
             if (!visible) {
@@ -72,13 +70,14 @@ class Inventory {
         });
 
         $(document).on("click", "#dropItem", function () {
-            let name = $(this).attr("data-name");
-            let item = $(this).attr("data-item");
-            let quantity = $(this).attr("data-quantity");
+            let record = $(this).attr("data-record");
+            let quantity = $("#quantitySelect").val();
 
-            self.config.socket.emit("drop", item, name, quantity, function () {
-                $("#itemDetail").hide();
-                $("#itemHolder").css("width", "97%");
+            self.config.socket.emit("drop", record, quantity, (type, message)   =>  {
+                if (!type) {
+                    alert(message);
+                    return;
+                }
             });
         });
 
@@ -115,7 +114,8 @@ class Inventory {
 
     getItemDetail (item) {
         var template = {
-            "id"                :   "0",
+            "record"            :   "0",
+            "item"              :   "0",
             "name"              :   "Item",
             "description"       :   "Item Description",
             "quantity"          :   "1",
@@ -153,9 +153,10 @@ class Inventory {
 
         template.display = amount;
 
-        let base64 = this.scene.textures.getBase64("items", item.id - 1, "image/png");
+        let base64 = this.scene.textures.getBase64("items", item.item - 1, "image/png");
         template.html += "<div class='itemContainer' ";
-            template.html += "data-id='" + template.id + "' ";
+            template.html += "data-record='" + template.record + "' ";
+            template.html += "data-item='" + template.item + "' ";
             template.html += "data-name='" + template.name + "' ";
             template.html += "data-description='" + template.description + "' ";
             template.html += "data-quantity='" + template.quantity + "' ";

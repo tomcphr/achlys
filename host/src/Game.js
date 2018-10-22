@@ -18,7 +18,6 @@ class Game {
         this.listens = [
             "items",
             "drop",
-            "pause",
             "message",
             "click"
         ];
@@ -50,29 +49,22 @@ class Game {
     };
 
     items (callback) {
-        this.user.items((type, message) =>  {
+        this.user.getItems((type, message) =>  {
             callback(type, message);
         });
     };
 
-    drop (item, name, quantity, callback) {
+    drop (inventoryId, quantity, callback) {
         let self = this;
-        this.user.drop(item, name, quantity, (status, message)  =>  {
-            if (!status) {
-                console.log(message);
-                return;
+        this.user.drop(inventoryId, quantity, (status, message)  =>  {
+            if (status) {
+                self.session.getSocket().emit("updated-items");
+            } else {
+                console.log("Drop Issue:", status, message);
             }
 
-            self.session.getSocket().emit("updated-items");
-
-            callback();
+            callback(status, message);
         })
-    };
-
-    pause () {
-        this.session.resetKeys();
-
-        this.user.walking = false;
     };
 
     click (data) {

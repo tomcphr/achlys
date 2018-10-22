@@ -12,8 +12,8 @@ class Message {
             var command = this.getCommand();
             if (command) {
                 command.execute();
+                return;
             }
-            return;
         }
 
         var message = this.user.message;

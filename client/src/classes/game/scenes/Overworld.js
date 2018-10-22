@@ -143,6 +143,18 @@ class Overworld extends Phaser.Scene {
             }
 
             group.add(sprite);
+
+            // Handle for any messages that the user may have associated with them
+            if (player.message.id && player.message.text) {
+                let divExists = $("#" + player.message.id).length;
+                if (!divExists) {
+                    let messageDiv = $("<div>", {
+                        "id"    :   player.message.id,
+                        "class" :   "historicMessage"
+                    }).html(player.id + ": " + player.message.text);
+                    $("#messageHistory").append(messageDiv);
+                }
+            }
         }
     }
 

@@ -1,38 +1,32 @@
 class User {
     constructor (username, session, world, sql, callback) {
+        this.width = 32;
+
+        this.height = 32;
+
         this.session = session;
 
         this.world = world;
 
         this.sql = sql;
 
-        this.moderator = 0;
-        this.width = 32;
-        this.height = 32;
-        this.avatar = "M";
-        this.facing = "down";
-        this.frame = 1;
-        this.walking = false;
-        this.speed = 4;
+        this.respawn();
 
-        this.path = [];
+        this.getUserData(username, callback);
 
         this.message = {
             "id"        :   "",
             "text"      :   "",
-            "timeout"   :   null,
+            "timeout"   :   null
         };
 
-        this.loaded = false;
-
-        this.respawn();
-
-        this.loadUser(username, callback);
+        this.inventory = new (require("./Inventory"))(sql, session, username);
     };
 
-    loadUser (username, callback) {
+    getUserData (username, callback) {
         var user = this;
         user.id = username;
+        user.loaded = false;
 
         var fields = {
             "moderator"     :   "a.moderator",
@@ -40,7 +34,7 @@ class User {
             "health"        :   "a.health",
             "x"             :   "b.x",
             "y"             :   "b.y",
-            "facing"        :   "b.facing",
+            "facing"        :   "b.facing"
         };
 
         var query = [
@@ -62,7 +56,7 @@ class User {
 
             let record = records[0];
             for (var key in fields) {
-                if (key == "x" || key == "y") {
+                if (key == "x" || key == "y" || key == "facing") {
                     if (!record[key]) {
                         this.respawn();
                         continue;
@@ -103,11 +97,17 @@ class User {
 
         this.x = random.x;
         this.y = random.y;
+        this.facing = "down";
 
         this.health = 100;
+
+        this.frame = 1;
+        this.walking = false;
+        this.path = [];
     };
 
     position () {
+        let moveSpeed = 4;
         this.walking = false;
         if (this.path.length) {
             let target = this.path[0];
@@ -115,34 +115,34 @@ class User {
             if (target.y < this.y) {
                 // up
                 this.facing = "up";
-                if ((this.y - this.speed) < target.y) {
+                if ((this.y - moveSpeed) < target.y) {
                     this.y = target.y;
                 } else {
-                    this.y -= this.speed;
+                    this.y -= moveSpeed;
                 }
             } else if (target.y > this.y) {
                 // down
                 this.facing = "down";
-                if ((this.y + this.speed) > target.y) {
+                if ((this.y + moveSpeed) > target.y) {
                     this.y = target.y;
                 } else {
-                    this.y += this.speed;
+                    this.y += moveSpeed;
                 }
             } else if (target.x > this.x) {
                 // right
                 this.facing = "right";
-                if ((this.x + this.speed) > target.x) {
+                if ((this.x + moveSpeed) > target.x) {
                     this.x = target.x;
                 } else {
-                    this.x += this.speed;
+                    this.x += moveSpeed;
                 }
             } else if (target.x < this.x) {
                 // left
                 this.facing = "left";
-                if ((this.x - this.speed) < target.x) {
+                if ((this.x - moveSpeed) < target.x) {
                     this.x = target.x;
                 } else {
-                    this.x -= this.speed;
+                    this.x -= moveSpeed;
                 }
             }
 
@@ -169,135 +169,50 @@ class User {
         }
     };
 
-    items (callback) {
-        var query = [
-            "SELECT b.id, b.name, b.description, a.quantity",
-            "FROM inventories a",
-            "JOIN items b ON b.id = a.item",
-            "WHERE a.?"
-        ];
-        query = query.join(" ");
-
-        var params = {
-            "username"  :   this.id
-        };
-
-        this.sql.query(query, params)
-            .then((items)    =>  {
-                callback(true, items);
-            })
-            .catch(()   =>  {
-                callback(false, "Could not get the provided user's inventory");
-            })
+    getItems (callback) {
+        this.inventory.getItems((status, message) =>  {
+            callback(status, message);
+        });
     };
 
     pickup (item, quantity) {
-        var username = this.id;
-
-        var where = {
-            "username"  :   username,
-            "item"      :   item,
-        };
-
-        var self = this;
-        this.sql.record("inventories", where)
-            .then((record)  =>  {
-                if (record) {
-                    var update = (parseInt(record.quantity) + parseInt(quantity));
-
-                    self.sql.update("inventories", where, {
-                        "quantity"  :   update
-                    }).then(()  =>  {
-                        self.session.getSocket().emit("updated-items");
-                    });
-
-                    return;
-                }
-
-                self.sql.insert("inventories", {
-                    "username"  :   username,
-                    "item"      :   item,
-                    "quantity"  :   quantity
-                }).then(()  =>  {
-                    self.session.getSocket().emit("updated-items");
-                }).catch((error) =>  {
-                    console.log(error);
-                });
-            })
-            .catch((error)   =>  {
-                console.log(error);
-            });
+        this.inventory.addItem(item, quantity);
     };
 
-    drop (item, name, quantity, callback) {
-        var self = this;
-
+    drop (inventoryId, quantity, callback) {
         var x = this.x;
         var y = this.y;
 
-        var where = {
-            "username"  :   this.id,
-            "item"      :   item,
-        };
+        var droppable = true;
+        switch (this.facing) {
+            case "left":
+                x -= this.width;
+                break;
+            case "right":
+                x += this.width;
+                break;
+            case "up":
+                y -= this.height;
+                break;
+            case "down":
+                y += this.height;
+                break;
+            default:
+                droppable = false;
+        }
+        if (!droppable) {
+            callback(false, "Something went wrong");
+            return;
+        }
 
-        var facing = this.facing;
-        var width = this.width;
-        var height = this.height;
+        var self = this;
+        this.inventory.dropItem(inventoryId, quantity, (status, message) =>  {
+            if (status) {
+                self.world.addDrop(message.item, message.name, quantity, x, y);
+            }
 
-        this.sql.record("inventories", where)
-            .then((record)    =>  {
-                if (!record) {
-                    return;
-                }
-
-                var update = (record.quantity - quantity);
-                if (update < 0) {
-                    callback(false, "You do not have this many to drop");
-                    return;
-                }
-
-                var tileWidth = 32;
-                var tileHeight = 32;
-
-                switch (facing) {
-                    case "left":
-                        x -= tileWidth;
-                        break;
-                    case "right":
-                        x += width;
-                        break;
-                    case "up":
-                        y -= tileHeight;
-                        break;
-                    case "down":
-                        y += height;
-                        break;
-                }
-
-                if (update > 0) {
-                    self.sql.update("inventories", where, {
-                        "quantity"  :   update,
-                    }).then(()  =>  {
-                        self.world.addDrop(item, name, quantity, x, y);
-
-                        callback(true, "Sucessful Drop");
-                    }).catch((error) =>  {
-                        callback(false, error);
-                    })
-                } else if (update == 0) {
-                    self.sql.delete("inventories", {
-                        "id"    :   record.id
-                    }).then(()  =>  {
-                        self.world.addDrop(item, name, quantity, x, y);
-
-                        callback(true, "Sucessful Drop");
-                    }).catch(() =>  {
-                        callback(false, error);
-                    });
-                }
-            }).catch((error)    =>  {
-                callback(false, error);
-            });
+            callback(status, message);
+        });
     };
 
     mod (status) {
@@ -321,7 +236,7 @@ class User {
     die () {
         var self = this;
         self.loaded = false;
-        self.items((status, message)   =>  {
+        self.getItems((status, message)   =>  {
             if (!status) {
                 console.log(message);
                 return;

@@ -35,6 +35,7 @@ class Serve {
         });
 
         server.use("/dist", this.express.static(above + "/client/dist"));
+        server.use("/gui", this.express.static(above + "/client/assets/gui"));
         server.use("/tilesets", this.express.static(above + "/client/assets/tilesets"));
         server.use("/css", this.express.static(above + "/client/css"));
 

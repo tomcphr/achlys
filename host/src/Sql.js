@@ -39,6 +39,7 @@ class Sql {
 
                     return resolve(data);
                 });
+                console.log(results.sql);
             }).catch ((error)   =>  {
                 reject(error);
             });

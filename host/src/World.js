@@ -46,8 +46,9 @@ class World {
             // Send the details of the world to every session
             for (var s in self.sessions) {
                 var session = self.sessions[s];
-
-                packet["logged"] = session.user.id;
+                if (session.user) {
+                    packet["logged"] = session.user.id;
+                }
 
                 session.getSocket().emit("details", packet);
             };
@@ -67,29 +68,6 @@ class World {
             return user;
         }
 
-        var keys = session.getKeys();
-        if (keys.space) {
-            user.attack();
-
-            // Check if the user is attacking any players
-            for (var s in this.sessions) {
-                var current = this.sessions[s];
-                if (current.id == session.id) {
-                    continue;
-                }
-
-                if (this.collision(session.user, current.user)) {
-                    // Only allow to attack if the user is facing that player.
-                    if (current.user.health > 0) {
-                        current.user.health -= 5;
-                        if (current.user.health < 0) {
-                            current.user.health = 0;
-                        }
-                    }
-                }
-            }
-        }
-
         user.position();
 
         user.animation();
@@ -101,7 +79,8 @@ class World {
         for (var i in this.items) {
             var item = this.items[i];
 
-            if (this.collision(user, item)) {
+            let touchingItem = this.collision(user, item);
+            if (touchingItem) {
                 this.removeDrop(i, ()   =>  {
                     user.pickup(item.id, item.quantity);
                 });
