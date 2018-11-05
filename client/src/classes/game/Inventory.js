@@ -31,7 +31,7 @@ class Inventory {
                 inventory += "<div id='detailName'></div>";
                 inventory += "<div id='detailText'></div>";
                 inventory += "<div id='detailActions'>";
-                    inventory += "<input type='number' id='quantitySelect' min='0'>"
+                    inventory += "<input type='number' id='quantitySelect' min='1' max='1'>";
                     inventory += "<button id='dropItem'>Drop</button>";
                 inventory += "</div>";
             inventory += "</div>";
@@ -61,6 +61,7 @@ class Inventory {
             $("#dropItem").attr("data-record", record);
 
             $("#quantitySelect").val(quantity);
+            $("#quantitySelect").attr("max", quantity);
 
             let visible = $("#itemDetail").is(":visible");
             if (!visible) {
