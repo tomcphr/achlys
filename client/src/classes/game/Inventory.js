@@ -42,7 +42,7 @@ class Inventory {
         this.updateInventory();
         this.config.socket.on("updated-items", function () {
             $("#itemDetail").hide();
-            $("#itemHolder").css("width", "97%");
+            $("#itemHolder").css("width", "100%");
             self.updateInventory();
         });
 
@@ -64,10 +64,20 @@ class Inventory {
             $("#quantitySelect").attr("max", quantity);
 
             let visible = $("#itemDetail").is(":visible");
-            if (!visible) {
-                $("#itemDetail").show();
-                $("#itemHolder").css("width", "67%");
+            let currentRecord = $("#itemDetail").attr("current-record");
+
+            // If we are clicking on the current item we are viewing and it's visible
+            // Then we should be hiding the record, otherwise show the new details
+            if (visible) {
+                if (currentRecord == record) {
+                    $("#itemDetail").hide();
+                    $("#itemHolder").css("width", "100%");
+                    return;
+                }
             }
+            $("#itemDetail").show();
+            $("#itemHolder").css("width", "67%");
+            $("#itemDetail").attr("current-record", record);
         });
 
         $(document).on("click", "#dropItem", function () {

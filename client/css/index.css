@@ -55,21 +55,19 @@
     height: 100%;
     padding: 5px;
     box-sizing: border-box;
+    border: 1px solid #000;
 }
 
 #itemHolder {
-    border: 1px solid #000;
     box-sizing: border-box;
     height: 100%;
     overflow-y: scroll;
-    width: 97%;
+    width: 100%;
     padding: 5px;
     float: left;
-    margin-right: 5px;
 }
 #itemDetail {
-    border: 1px solid #000;
-    width: 30%;
+    width: 33%;
     float: left;
     height: 100%;
     box-sizing: border-box;

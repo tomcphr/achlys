@@ -82,23 +82,31 @@ class Inventory {
                         "quantity"  :   i.quantity
                     };
 
-                    // If the quantity of the item is below the max quantity then try to insert add the additional quantity on.
-                    if (i.quantity < MAX_INT && !added) {
-                        insert.quantity = (i.quantity + quantity);
+                    if (!added) {
+                        // If the quantity of the item is below the max quantity then try to insert add the additional quantity on.
+                        if (i.quantity < MAX_INT) {
+                            insert.quantity = (i.quantity + quantity);
 
-                        // If we push the quantity over the threshold then insert a new record with the leftover.
-                        if (insert.quantity > MAX_INT) {
-                            let leftover = (insert.quantity - MAX_INT);
+                            // If we push the quantity over the threshold then insert a new record with the leftover.
+                            if (insert.quantity > MAX_INT) {
+                                let leftover = (insert.quantity - MAX_INT);
 
-                            insert.quantity -= leftover;
+                                insert.quantity -= leftover;
 
+                                inserts.push({
+                                    "username"  :   username,
+                                    "item"      :   item,
+                                    "quantity"  :   leftover
+                                });
+                            }
+                            added = true;
+                        } else {
                             inserts.push({
                                 "username"  :   username,
                                 "item"      :   item,
-                                "quantity"  :   leftover
+                                "quantity"  :   quantity
                             });
                         }
-                        added = true;
                     }
 
                     inserts.push(insert);
