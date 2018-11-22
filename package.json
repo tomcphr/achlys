@@ -1,8 +1,7 @@
 {
   "name": "achlys",
-  "version": "0.2.1",
-  "description": "",
-  "main": "app.js",
+  "version": "0.2.2",
+  "description": "A small web-based MMO",
   "dependencies": {
     "bcrypt": "^2.0.1",
     "db-migrate": "^0.11.3",
@@ -10,9 +9,16 @@
     "email-validator": "^2.0.4",
     "express": "^4.16.3",
     "mysql": "^2.16.0",
+    "npm": "^6.4.1",
     "pathfinding": "^0.4.18",
+    "phaser": "^3.11.0",
     "q": "^1.5.1",
-    "socket.io": "^2.1.0"
+    "socket.io": "^2.1.0",
+    "socket.io-client": "^2.1.1",
+    "webpack": "^4.16.5"
+  },
+  "devDependencies": {
+    "webpack-command": "^0.4.1"
   },
   "repository": {
     "type": "git",
@@ -20,7 +26,9 @@
   },
   "scripts": {
     "migrate-up": "./node_modules/.bin/db-migrate up",
-    "migrate-down": "./node_modules/.bin/db-migrate down"
+    "migrate-down": "./node_modules/.bin/db-migrate down",
+    "compile": "./node_modules/.bin/webpack --config webpack.config.js",
+    "server": "node ./host/app.js"
   },
   "author": "tomcphr"
 }
