@@ -1,4 +1,4 @@
-let json = (require("fs")).readFileSync(__dirname + "/database.json");
+let json = (require("fs")).readFileSync("database.json");
 let database = JSON.parse(json).dev;
 
 let mapFile = (require("fs")).readFileSync(__dirname + "/map.json");

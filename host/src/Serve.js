@@ -23,13 +23,13 @@ class Serve {
         });
 
         server.get("/js/sockets.js", function (request, response) {
-            var location = above + "/client/node_modules/socket.io-client/dist/socket.io.slim.js";
+            var location = above + "/node_modules/socket.io-client/dist/socket.io.slim.js";
 
             response.sendFile(location);
         })
 
         server.get("/js/phaser.js", function (request, response) {
-            var location = above + "/client/node_modules/phaser/dist/phaser.js";
+            var location = above + "/node_modules/phaser/dist/phaser.js";
 
             response.sendFile(location);
         });
