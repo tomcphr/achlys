@@ -10,10 +10,10 @@ class Chat {
     create() {
         let html = "<div id='messageContainer'>";
                 html += "<div id='messageHistory'></div>";
-                html += "<input type='text' name='message' id='messageText'>";
-                html += "<span id='sendContainer'>";
+                html += "<div id='currentMessage'>";
+                    html += "<input type='text' name='message' id='messageText'>";
                     html += "<button id='sendMessage'>Send</button>";
-                html += "</span>";
+                html += "</div>";
             html += "</div>";
         $("#gameContainer").append(html);
 
