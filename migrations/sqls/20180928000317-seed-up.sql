@@ -1,6 +1,6 @@
 CREATE TABLE `users` (
     `id` INT NOT NULL AUTO_INCREMENT,
-    `moderator` INT(1) NOT NULL,
+    `moderator` INT(1) NOT NULL DEFAULT "0",
     `username` VARCHAR(30) NOT NULL,
     `password` VARCHAR(256) NOT NULL,
     `email` VARCHAR(256) NOT NULL,
