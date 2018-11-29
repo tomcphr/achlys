@@ -1,6 +1,6 @@
 {
   "name": "achlys",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "A small web-based MMO",
   "dependencies": {
     "bcrypt": "^2.0.1",
