@@ -87,7 +87,7 @@ class User {
                 return;
             }
 
-            $("#loginForm").remove();
+            $("#loginForm").hide();
 
             let game = new Game(self.socket);
             game.start();
@@ -106,6 +106,8 @@ class User {
                 alert(message);
                 return;
             }
+
+            $("#regiForm").hide();
 
             self.loginUser(username, password);
         });
