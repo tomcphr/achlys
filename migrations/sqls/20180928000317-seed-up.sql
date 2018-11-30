@@ -14,7 +14,7 @@ CREATE TABLE `users` (
 INSERT INTO `users` (moderator, username, password, email, avatar, health)
 VALUES
 (1, "test_1", "$2b$10$sqOFzeS9pRN5lIADiPTykOUH9TX0bM9s1XLebuGlnJCh2WCsPGOmO", "test1@test.test", "M", 50),
-(2, "test_2", "$2b$10$sqOFzeS9pRN5lIADiPTykOUH9TX0bM9s1XLebuGlnJCh2WCsPGOmO", "test2@test.test", "F", 50);
+(1, "test_2", "$2b$10$sqOFzeS9pRN5lIADiPTykOUH9TX0bM9s1XLebuGlnJCh2WCsPGOmO", "test2@test.test", "F", 50);
 
 CREATE TABLE `positions` (
     `username` VARCHAR(30) NOT NULL,
