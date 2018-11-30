@@ -15,7 +15,7 @@ class Chat {
                     html += "<button id='sendMessage'>Send</button>";
                 html += "</div>";
             html += "</div>";
-        $("#gameContainer").append(html);
+        $("#ui-chat").append(html);
 
         $("#messageText").on("keyup", function (event) {
             event.preventDefault();

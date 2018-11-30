@@ -4,7 +4,6 @@ import Game from "./Game";
 class User {
     constructor () {
         this.socket = io();
-        
         this.displayForm();
     }
 
@@ -91,6 +90,11 @@ class User {
 
             let game = new Game(self.socket);
             game.start();
+            self.socket.on("disconnect", () =>  {
+                alert("Lost connection to server");
+                game.stop();
+                self.displayLogin();
+            });
         });
     }
 

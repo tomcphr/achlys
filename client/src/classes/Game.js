@@ -4,9 +4,7 @@ import Interface from "./game/scenes/Interface";
 class Game {
     constructor (socket) {
         this.socket = socket;
-    }
 
-    start () {
         this.game = new Phaser.Game({
             parent: "gameContainer",
             type: Phaser.AUTO,
@@ -20,7 +18,9 @@ class Game {
                 }
             }
         });
+    }
 
+    start () {
         let scenes = {
             "overworld" :   Overworld,
             "Interface" :   Interface
@@ -31,6 +31,12 @@ class Game {
 
             this.game.scene.add(scene, handler, true, {"socket": this.socket});
         }
+    }
+
+    stop () {
+        $("#ui-chat").html("");
+        $("#ui-inventory").html("");
+        this.game.destroy(true);
     }
 }
 
