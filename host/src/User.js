@@ -236,14 +236,21 @@ class User {
     die () {
         var self = this;
         self.loaded = false;
+
+        var totalItems = 0;
+        var droppedItems = 0;
         self.getItems((status, message)   =>  {
             if (!status) {
                 console.log(message);
                 return;
             }
 
-            var totalItems = 0;
-            var droppedItems = 0;
+            if (message.length == 0) {
+                self.respawn();
+                self.loaded = true;
+                return;
+            }
+
             for (var key in message) {
                 totalItems++;
 
