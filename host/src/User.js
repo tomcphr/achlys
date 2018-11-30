@@ -249,17 +249,18 @@ class User {
 
                 var item = message[key];
 
-                self.drop(item.id, item.name, item.quantity, (status, message) =>  {
+                self.drop(item.record, item.quantity, (status, message) =>  {
                     if (!status) {
                         console.log(message);
                     }
                     droppedItems++;
-                });
-            }
 
-            if (totalItems === droppedItems) {
-                self.respawn();
-                self.loaded = true;
+                    if (totalItems === droppedItems) {
+                        self.respawn();
+                        self.session.getSocket().emit("updated-items");
+                        self.loaded = true;
+                    }
+                });
             }
         })
     };
