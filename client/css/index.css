@@ -154,6 +154,7 @@
 #sendMessage {
     float: right;
     width: 20%;
+    height: 100%;
     box-sizing: border-box;
 }
 
