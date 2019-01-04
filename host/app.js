@@ -65,6 +65,6 @@ serve.getIo().sockets.on("connection", (socket)  =>  {
     });
 
     socket.on("disconnect", ()  =>  {
-        world.logout(session);
+        world.disconnect(session);
     });
 });

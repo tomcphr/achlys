@@ -149,6 +149,7 @@
 #messageText {
     float: left;
     width: 80%;
+    height: 100%;
     box-sizing: border-box;
 }
 #sendMessage {

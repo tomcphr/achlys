@@ -34,9 +34,8 @@ class Game {
     }
 
     stop () {
-        $("#ui-chat").html("");
-        $("#ui-inventory").html("");
-        this.game.destroy(true);
+        // As phaser doesn't want to destroy it's canvas correctly, just reload the page.
+        window.location = "?";
     }
 }
 

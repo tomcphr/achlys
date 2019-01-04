@@ -90,10 +90,18 @@ class User {
 
             let game = new Game(self.socket);
             game.start();
+
             self.socket.on("disconnect", () =>  {
-                alert("Lost connection to server");
+                alert("Lost connection to the server");
                 game.stop();
-                self.displayLogin();
+            });
+
+            self.socket.on("logout", (reason)   =>  {
+                if (!reason) {
+                    reason = "Disconnected from the server";
+                }
+                alert(reason);
+                game.stop();
             });
         });
     }

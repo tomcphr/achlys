@@ -30,12 +30,19 @@ class Command {
         this[key].apply(this, params);
     };
 
-    kick (username) {
+    kick (username, reason = "") {
         var userSession = this.world.getUserSession(username);
         if (!userSession) {
             return;
         }
-        this.world.logout(userSession);
+        var currentUser = this.user.id;
+
+        var kickMessage = "Kicked by " + currentUser;
+        if (reason) {
+            kickMessage = kickMessage + ": " + reason;
+        }
+
+        this.world.logout(userSession, null, kickMessage);
     };
 
     kill (username) {

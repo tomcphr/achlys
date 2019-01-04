@@ -216,21 +216,38 @@ class World {
         return false;
     };
 
-    logout (session) {
-        var self = this;
+    logout (session, callback, reason = "") {
+        if (!session.user) {
+            return;
+        }
 
+        var user = session.user;
+        if (callback) {
+            user.save(callback);
+        } else {
+            user.save();
+        }
+
+        session.user = null;
+
+        if (reason) {
+            session.getSocket().emit("logout", reason);
+        }
+    }
+
+    disconnect (session) {
         var id = session.id;
         if (!(id in this.sessions)) {
             return;
         }
 
+        var self = this;
         if (!("user" in this.sessions[id])) {
             self.removeSession(session);
             return;
         }
-        var user = this.sessions[id].user;
 
-        user.save(()    =>  {
+        this.logout(session, () =>  {
             self.removeSession(session);
         });
     };
