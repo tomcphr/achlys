@@ -1,6 +1,8 @@
 class Overworld extends Phaser.Scene {
     constructor () {
-        super();
+        super({
+            "active": true
+        });
     }
 
     preload () {

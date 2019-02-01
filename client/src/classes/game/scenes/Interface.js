@@ -3,7 +3,9 @@ import Inventory from "../Inventory";
 
 class Interface extends Phaser.Scene {
     constructor () {
-        super();
+        super({
+            "active": true
+        });
     }
 
     preload () {
