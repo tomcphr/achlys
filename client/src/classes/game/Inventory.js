@@ -1,5 +1,7 @@
 class Inventory {
     constructor(scene, config) {
+        this.create();
+
         this.scene = scene;
 
         this.config = config;
@@ -21,6 +23,12 @@ class Inventory {
             $("#ui-inventory").dialog("option", "position", {my: "center", at: "center", of: window});
         });
     };
+
+    create () {
+        let html = "<img id='inventoryButton' src='gui/inventory-button.png'></img>";
+        $("#gameContainer").append(html);
+        this.resetInventoryClicks();
+    }
 
     open () {
         $("#ui-inventory").dialog("open");
@@ -96,7 +104,7 @@ class Inventory {
     };
 
     close () {
-        $(document).off("click");
+        this.resetInventoryClicks();
 
         $("#ui-inventory").html("");
 
@@ -104,6 +112,18 @@ class Inventory {
 
         this.displayed = false;
     };
+
+    resetInventoryClicks () {
+        var self = this;
+        $(document).off("click");
+        $(document).on("click", "#inventoryButton", ()  =>  {
+            if (self.displayed) {
+                self.close();
+            } else {
+                self.open();
+            }
+        });
+    }
 
     updateInventory () {
         let self = this;

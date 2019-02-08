@@ -34,6 +34,7 @@ class Game {
     }
 
     stop () {
+        $("#inventoryButton").remove();
         $("#ui-chat").html("");
         $("#ui-inventory").html("");
         this.socket.removeAllListeners("details");

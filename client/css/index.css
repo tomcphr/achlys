@@ -41,6 +41,18 @@
 }
 
 /** Inventory **/
+#inventoryButton {
+    position: fixed;
+    right: 0%;
+    bottom: 0%;
+    transform: translate(-10%, -10%);
+    margin: 0 auto;
+    width: 48px;
+    height: 48px;
+    box-sizing: border-box;
+    cursor: pointer;
+}
+
 #inventoryContents {
     width: 100%;
     height: 100%;
@@ -115,6 +127,7 @@
 .itemImage {
     float: left;
     margin-right: 5px;
+    user-select: none;
 }
 .itemText {
     float: left;
