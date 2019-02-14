@@ -24,6 +24,15 @@ CREATE TABLE `positions` (
     PRIMARY KEY (`username`)
 ) ENGINE = InnoDB;
 
+CREATE TABLE `equipped` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `username` VARCHAR(30) NOT NULL,
+    `item` INT NOT NULL,
+    `quantity` INT NOT NULL,
+    PRIMARY KEY (`id`),
+    CONSTRAINT UNIQUE (`username`, `item`)
+) ENGINE = InnoDB;
+
 CREATE TABLE `items` (
     `id` INT NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(50) NOT NULL,
