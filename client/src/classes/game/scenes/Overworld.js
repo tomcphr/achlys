@@ -70,6 +70,19 @@ class Overworld extends Phaser.Scene {
             this.items(this, items, data.items);
         }).bind(this));
 
+        this.input.on("pointerdown", (pointer)   =>  {
+            let type = "left";
+            if (pointer.rightButtonDown()) {
+                type = "right";
+            }
+
+            this.socket.emit("click", {
+                "type"  :   type,
+                "x"     :   this.world.marker.x,
+                "y"     :   this.world.marker.y
+            });
+        }, this);
+
         // Set the camera to zoom
         this.cameras.main.setZoom(1.5);
     }
@@ -85,22 +98,6 @@ class Overworld extends Phaser.Scene {
             const pointerTileXY = this.world.layer.worldToTileXY(worldPoint.x, worldPoint.y);
             const snappedWorldPoint = this.world.layer.tileToWorldXY(pointerTileXY.x, pointerTileXY.y);
             this.world.marker.setPosition(snappedWorldPoint.x, snappedWorldPoint.y);
-
-            let params = {
-                "type"  :   null,
-                "x"     :   snappedWorldPoint.x,
-                "y"     :   snappedWorldPoint.y
-            };
-
-            // Click to move
-            let activePointer = this.input.manager.activePointer;
-            if (activePointer.justUp) {
-                params.type = "left";
-                if (activePointer.rightButtonDown()) {
-                    params.type = "right";
-                }
-                this.socket.emit("click", params);
-            }
         }
     }
 

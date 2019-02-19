@@ -18,7 +18,7 @@ class User {
                 loginForm += "<button id='registerButton' type='submit'>Register</button>";
                 loginForm += "<button id='loginButton' type='submit'>Login</button>";
             loginForm += "</div>";
-        $("#gameContainer").append(loginForm);
+        $("#userForm").append(loginForm);
         var regiForm = "<div id='regiForm' class='container loginContainer hidden'>";
                 regiForm += "<label for='email'>Email:</label>";
                 regiForm += "<input type='text' class='loginInput' id='emailRegister' placeholder='Email' name='email' required>";
@@ -29,7 +29,7 @@ class User {
                 regiForm += "<button id='backButton' type='submit'>Back</button>";
                 regiForm += "<button id='createUserButton' type='submit'>Create</button>";
             regiForm += "</div>";
-        $("#gameContainer").append(regiForm);
+        $("#userForm").append(regiForm);
 
         this.displayLogin();
     }
@@ -71,6 +71,7 @@ class User {
             var username = $("#usernameRegister").val();
             var password = $("#passwordRegister").val();
 
+            // TODO - User create avatar correctly
             self.createUser(email, username, password, "F");
         });
     }
@@ -89,7 +90,6 @@ class User {
             $("#loginForm").hide();
 
             let game = new Game(self.socket);
-            game.start();
 
             self.socket.off("disconnect");
             self.socket.on("disconnect", () =>  {

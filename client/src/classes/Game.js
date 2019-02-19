@@ -3,24 +3,31 @@ import Interface from "./game/scenes/Interface";
 
 class Game {
     constructor (socket) {
+        var gameContainer = "<div id='gameContainer'>";
+                gameContainer += "<div id='ui-chat'></div>";
+                gameContainer += "<div id='ui-inventory'></div>";
+            gameContainer += "</div>";
+        $("body").append(gameContainer);
+
         this.socket = socket;
 
         this.game = new Phaser.Game({
-            parent: "gameContainer",
             type: Phaser.AUTO,
-            width: 960,
-            height: 600,
             physics: {
                 default: "arcade",
                 arcade: {
                     gravity: {y: 0},
                     debug: false
                 }
+            },
+            scale: {
+                parent: "gameContainer",
+                width: 960,
+                height: 600,
+                mode: Phaser.Scale.FIT,
+                autoCenter: Phaser.Scale.CENTER_BOTH
             }
         });
-    }
-
-    start () {
         let scenes = {
             "overworld" :   Overworld,
             "Interface" :   Interface
@@ -34,9 +41,7 @@ class Game {
     }
 
     stop () {
-        $("#inventoryButton").remove();
-        $("#ui-chat").html("");
-        $("#ui-inventory").html("");
+        $("#gameContainer").remove();
         this.socket.removeAllListeners("details");
         this.game.destroy(true);
     }
