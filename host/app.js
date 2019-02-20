@@ -1,9 +1,6 @@
 let json = (require("fs")).readFileSync("database.json");
 let database = JSON.parse(json).dev;
 
-let mapFile = (require("fs")).readFileSync(__dirname + "/map.json");
-let map = JSON.parse(mapFile).tiles;
-
 let sql = new (require("./src/Sql"))({
     host        :   database.host,
     user        :   database.user,
@@ -17,6 +14,9 @@ sql.getConnection().catch((error)   =>  {
 
 let serve = new (require("./src/Serve"))();
 serve.listen();
+
+let mapFile = (require("fs")).readFileSync(__dirname + "/map.json");
+let map = JSON.parse(mapFile).tiles;
 
 let world = new (require("./src/World"))(map);
 world.tick();
