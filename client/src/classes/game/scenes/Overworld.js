@@ -150,7 +150,7 @@ class Overworld extends Phaser.Scene {
                     let messageDiv = $("<div>", {
                         "id"    :   player.message.id,
                         "class" :   "historicMessage"
-                    }).html(player.id + ": " + player.message.text);
+                    }).text(player.id + ": " + player.message.text);
                     $("#messageHistory").append(messageDiv);
                 }
             }
