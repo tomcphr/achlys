@@ -77,23 +77,8 @@ class User {
     };
 
     respawn () {
-        let tilemap = this.world.getTileMap();
-
-        let positions = [];
-        for (var row = 0; row < tilemap.length; row++) {
-            for (var col = 0; col < tilemap[row].length; col++) {
-                let tile = tilemap[row][col];
-                if (tile == 0) {
-                    continue;
-                }
-
-                positions.push({
-                    "x"     :   col * 32,
-                    "y"     :   row * 32,
-                });
-            }
-        }
-        let random = positions[positions.length * Math.random() | 0];
+        let paths = new (require("./Paths"))(this.world, this);
+        let random = paths.getRandomXY();
 
         this.x = random.x;
         this.y = random.y;
