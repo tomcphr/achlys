@@ -3,15 +3,16 @@ A small web-based MMO
 
 # Todo
 ### Combat
-* Movement to the other player
 * Attacking animations
-* Attack UI on the client side
 * Damage calculator
 ### Skills
 ?
 ### Equipment
 * Armour
 * Weapons
+### World
+* Tiled map editor support
+* First proper dungeon
 
 # License
 Please see the 'LICENSE' file in the repository
