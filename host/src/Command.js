@@ -16,7 +16,7 @@ class Command {
         }
 
         var params = this.params;
-        if (params.length != this[key].length) {
+        if (params.length < this[key].length) {
             return false;
         }
 

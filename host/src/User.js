@@ -100,10 +100,12 @@ class User {
         this.facing = "down";
 
         this.health = 100;
+        this.maxHealth = 100;
 
         this.frame = 1;
         this.walking = false;
         this.path = [];
+        this.resetAttack();
     };
 
     position () {
@@ -152,9 +154,39 @@ class User {
                 this.walking = false;
             }
         }
+
+        // Once we have stopped moving; if we are following, update the path
+        if (!this.walking && this.following) {
+            let paths = new (require("./Paths"))(this.world, this);
+            let following = paths.follow(this.following);
+
+            // If we cannot follow for some reason; then reset.
+            if (!following) {
+                this.resetAttack();
+            }
+        }
     };
 
-    attack () {
+    attack (username) {
+        this.attacking.user = username;
+
+        this.follow(username);
+    };
+
+    resetAttack () {
+        this.attacking = {
+            "user"      :   "",
+            "timeout"   :   null
+        };
+        this.following = "";
+    }
+
+    follow (username) {
+        this.following = username;
+    }
+
+    damage (amount) {
+        this.health -= amount;
     };
 
     animation () {

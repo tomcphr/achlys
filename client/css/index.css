@@ -11,6 +11,11 @@
     display: none;
 }
 
+#contextMenu {
+    width: 75px;
+    position: fixed;
+}
+
 /** Login Form **/
 .loginContainer {
     width: 50%;

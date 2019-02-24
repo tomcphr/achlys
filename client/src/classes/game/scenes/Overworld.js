@@ -71,6 +71,8 @@ class Overworld extends Phaser.Scene {
         }).bind(this));
 
         this.input.on("pointerdown", (pointer)   =>  {
+            $("#contextMenu").remove();
+
             let type = "left";
             if (pointer.rightButtonDown()) {
                 type = "right";
@@ -80,6 +82,50 @@ class Overworld extends Phaser.Scene {
                 "type"  :   type,
                 "x"     :   this.world.marker.x,
                 "y"     :   this.world.marker.y
+            });
+
+            var self = this;
+            this.socket.on("context-menu", (data)   =>  {
+                var html = "<ul id='contextMenu'>";
+                for (var id in data) {
+                    var item = data[id];
+
+                    html += "<li>";
+                        html += "<div>" + item.title + "</div>";
+                        if (Object.keys(item.options).length) {
+                            html += "<ul>";
+                                for (var option in item.options) {
+                                    var title = item.options[option];
+                                    html += "<li key='" + item.title + "' option='" + option + "'><div>" + title + "</div></li>";
+                                }
+                            html += "</ul>";
+                        }
+                    html += "</li>";
+                }
+                html += "</ul>";
+                if ($("#contextMenu").length) {
+                    $("#contextMenu").remove();
+                }
+                $("#gameContainer").append(html);
+
+                var x = pointer.event.clientX,
+                    y = pointer.event.clientY;
+                $("#contextMenu").css("top", y + "px");
+                $("#contextMenu").css("left", x + "px");
+
+                $("#contextMenu").menu({
+                    select: function (event, ui) {
+                        var key = ui.item.attr("key");
+                        if (!key) {
+                            return;
+                        }
+                        self.socket.emit("menu", {
+                            "key"       :   key,
+                            "option"    :   ui.item.attr("option")
+                        });
+                        $("#contextMenu").remove();
+                    }
+                });
             });
         }, this);
 
@@ -140,8 +186,10 @@ class Overworld extends Phaser.Scene {
             if (logged === id) {
                 scene.cameras.main.startFollow(sprite);
             }
+            let health = scene.add.text(player.x, player.y - 5, player.health + "/" + player.maxHealth, { fontSize: "9px", fill: "#000" });
 
             group.add(sprite);
+            group.add(health);
 
             // Handle for any messages that the user may have associated with them
             if (player.message.id && player.message.text) {

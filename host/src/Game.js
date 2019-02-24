@@ -16,7 +16,8 @@ class Game {
             "items",
             "drop",
             "message",
-            "click"
+            "click",
+            "menu"
         ];
     };
 
@@ -73,7 +74,34 @@ class Game {
             return;
         }
 
+        this.user.resetAttack();
+
         if (data.type === "right") {
+            var users = this.world.getUsersAtXY(data.x, data.y);
+
+            var menu = [];
+            for (var id in users) {
+                var user = users[id];
+
+                // Don't allow the user to select themselves
+                if (user.id == this.user.id) {
+                    continue;
+                }
+
+                menu.push({
+                    "title"     :   user.id,
+                    "options"   :   {
+                        "attack"    :   "Attack",
+                        "trade"     :   "Trade",
+                        "follow"    :   "Follow",
+                    }
+                });
+            }
+
+            if (menu.length) {
+                this.session.getSocket().emit("context-menu", menu);
+            }
+
             return;
         }
 
@@ -85,8 +113,27 @@ class Game {
                 paths.redirect(data.x, data.y);
             }
         }
-
     };
+
+    menu (data) {
+        var key = data.key;
+
+        var option = data.option;
+
+        switch (option) {
+            case "attack":
+                this.user.attack(key);
+                break;
+
+            case "trade":
+                // Do some trading stuff
+                break;
+
+            case "follow":
+                this.user.follow(key);
+                break;
+        }
+    }
 
     message (text) {
         var message = new (require("./Message"))(this.user, this.world, text);

@@ -27,6 +27,7 @@ class World {
                     "loaded"    :   user.loaded,
                     "id"        :   user.id,
                     "health"    :   user.health,
+                    "maxHealth" :   user.maxHealth,
                     "avatar"    :   user.avatar,
                     "facing"    :   user.facing,
                     "frame"     :   Math.ceil(user.frame),
@@ -75,6 +76,35 @@ class World {
             user.die();
         }
 
+        if (user.attacking.user) {
+            let session = this.getUserSession(user.attacking.user);
+            if (session) {
+                let victim = session.user;
+
+                let paths = new (require("./Paths"))(this, user);
+
+                let distance = paths.distance(victim.x, victim.y);
+
+                // If we are within one block of the user; attack.
+                if (distance <= 1) {
+                    if (!user.attacking.timeout) {
+                        user.attacking.timeout = setTimeout(()  =>  {
+                            victim.damage(10);
+
+                            clearTimeout(user.attacking.timeout);
+
+                            user.attacking.timeout = null;
+
+                            // If we have just caused the player to die; don't beat a dead horse.
+                            if (victim.health <= 0) {
+                                user.resetAttack();
+                            }
+                        }, 1000);
+                    }
+                }
+            }
+        }
+
         // Check if the player is touching any dropped items
         for (var i in this.items) {
             var item = this.items[i];
@@ -101,7 +131,7 @@ class World {
             }
 
             if (user.x == x && user.y == y) {
-                users.push(session);
+                users.push(user);
             }
         }
         return users;
