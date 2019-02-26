@@ -42,7 +42,7 @@ class Game {
 
     stop () {
         $("#gameContainer").remove();
-        this.socket.removeAllListeners("details");
+        this.socket.removeAllListeners("gameTick");
         this.game.destroy(true);
     }
 }

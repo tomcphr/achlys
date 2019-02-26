@@ -10,6 +10,8 @@ class World {
     tick () {
         var self = this;
 
+        var paths = new (require("./Paths"))(this);
+
         var update = () =>  {
             var packet = {
                 "players"   :   {}
@@ -33,16 +35,19 @@ class World {
                     "frame"     :   Math.ceil(user.frame),
                     "x"         :   user.x,
                     "y"         :   user.y,
+                    "following" :   user.following,
+                    "walking"   :   user.walking,
                     "message"   :   {
                         "id"        :   user.message.id,
                         "text"      :   user.message.text,
-                    },
+                    }
                 };
             }
 
             packet["items"] = self.getDroppedItems();
 
-            packet["world"] = self.map;
+            packet["worldMap"] = self.getTileMap();
+            packet["worldMatrix"] = paths.getTileMatrix();
 
             // Send the details of the world to every session
             for (var s in self.sessions) {
@@ -51,7 +56,7 @@ class World {
                     packet["logged"] = session.user.id;
                 }
 
-                session.getSocket().emit("details", packet);
+                session.getSocket().emit("gameTick", packet);
             };
         };
         let interval = setInterval(update, 1000 / 30);
@@ -81,12 +86,35 @@ class World {
             if (session) {
                 let victim = session.user;
 
-                let paths = new (require("./Paths"))(this, user);
-
-                let distance = paths.distance(victim.x, victim.y);
+                var hitmarkers = {
+                    "above" :   {
+                        "x"     :   victim.x,
+                        "y"     :   victim.y - 32,
+                    },
+                    "below" :   {
+                        "x"     :   victim.x,
+                        "y"     :   victim.y + 32,
+                    },
+                    "left"  :   {
+                        "x"     :   victim.x - 32,
+                        "y"     :   victim.y,
+                    },
+                    "right" :   {
+                        "x"     :   victim.x + 32,
+                        "y"     :   victim.y,
+                    },
+                };
+                let inRange = false;
+                for (var type in hitmarkers) {
+                    var hitmarker = hitmarkers[type];
+                    if (hitmarker.x === user.x && hitmarker.y === user.y) {
+                        inRange = true;
+                        break;
+                    }
+                }
 
                 // If we are within one block of the user; attack.
-                if (distance <= 1) {
+                if (inRange) {
                     if (!user.attacking.timeout) {
                         user.attacking.timeout = setTimeout(()  =>  {
                             victim.damage(10);
@@ -97,7 +125,7 @@ class World {
 
                             // If we have just caused the player to die; don't beat a dead horse.
                             if (victim.health <= 0) {
-                                user.resetAttack();
+                                user.reset();
                             }
                         }, 1000);
                     }

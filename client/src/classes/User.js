@@ -42,6 +42,8 @@ class User {
 
         $("#loginButton").off("click");
         $("#loginButton").on("click", ()   =>  {
+            $("#loginButton").off("click");
+
             var username = $("#usernameLogin").val();
             var password = $("#passwordLogin").val();
 
@@ -67,6 +69,8 @@ class User {
 
         $("#createUserButton").off("click");
         $("#createUserButton").on("click", () =>  {
+            $("#createUserButton").off("click");
+
             var email = $("#emailRegister").val();
             var username = $("#usernameRegister").val();
             var password = $("#passwordRegister").val();

@@ -45,7 +45,8 @@ CREATE TABLE `items` (
 INSERT INTO `items` (name, description, tradable, equipable)
 VALUES
 ("Coins", "Lovely Money!", 1, 0),
-("Blade of Eben", "A sharp, distinctive blade", 0, 1);
+("Blade of Eben", "A sharp, distinctive blade", 0, 1),
+("Staff of Jingle", "Memories of what once was", 1, 0);
 
 CREATE TABLE `inventories` (
     `id` INT NOT NULL AUTO_INCREMENT,

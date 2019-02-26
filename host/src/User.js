@@ -90,7 +90,7 @@ class User {
         this.frame = 1;
         this.walking = false;
         this.path = [];
-        this.resetAttack();
+        this.reset();
     };
 
     position () {
@@ -139,17 +139,14 @@ class User {
                 this.walking = false;
             }
         }
+    };
 
-        // Once we have stopped moving; if we are following, update the path
-        if (!this.walking && this.following) {
-            let paths = new (require("./Paths"))(this.world, this);
-            let following = paths.follow(this.following);
-
-            // If we cannot follow for some reason; then reset.
-            if (!following) {
-                this.resetAttack();
-            }
-        }
+    reset () {
+        this.attacking = {
+            "user"      :   "",
+            "timeout"   :   null
+        };
+        this.following = "";
     };
 
     attack (username) {
@@ -158,17 +155,13 @@ class User {
         this.follow(username);
     };
 
-    resetAttack () {
-        this.attacking = {
-            "user"      :   "",
-            "timeout"   :   null
-        };
-        this.following = "";
-    }
-
     follow (username) {
         this.following = username;
-    }
+    };
+
+    trade (username) {
+        // Trading code goes here.
+    };
 
     damage (amount) {
         this.health -= amount;

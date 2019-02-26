@@ -17,6 +17,7 @@ class Game {
             "drop",
             "message",
             "click",
+            "follow",
             "menu"
         ];
     };
@@ -66,53 +67,12 @@ class Game {
     };
 
     click (data) {
-        if (!data.type) {
-            return;
-        }
+        this.user.reset();
+        this.user.path = data;
+    };
 
-        if (isNaN(data.x) || isNaN(data.y)) {
-            return;
-        }
-
-        this.user.resetAttack();
-
-        if (data.type === "right") {
-            var users = this.world.getUsersAtXY(data.x, data.y);
-
-            var menu = [];
-            for (var id in users) {
-                var user = users[id];
-
-                // Don't allow the user to select themselves
-                if (user.id == this.user.id) {
-                    continue;
-                }
-
-                menu.push({
-                    "title"     :   user.id,
-                    "options"   :   {
-                        "attack"    :   "Attack",
-                        "trade"     :   "Trade",
-                        "follow"    :   "Follow",
-                    }
-                });
-            }
-
-            if (menu.length) {
-                this.session.getSocket().emit("context-menu", menu);
-            }
-
-            return;
-        }
-
-        // If the user needs to go somewhere, position them accordingly
-        if (this.user.x != data.x || this.user.y != data.y) {
-            // For now, ensure that we only dealing with map coords since we aren't setting tile map bounds
-            if (data.x >= 0 && data.y >= 0) {
-                var paths = new (require("./Paths"))(this.world, this.user);
-                paths.redirect(data.x, data.y);
-            }
-        }
+    follow (data) {
+        this.user.path = data;
     };
 
     menu (data) {
@@ -122,18 +82,24 @@ class Game {
 
         switch (option) {
             case "attack":
+                if (key === this.user.id) {
+                    break;
+                }
                 this.user.attack(key);
                 break;
 
             case "trade":
-                // Do some trading stuff
+                if (key === this.user.id) {
+                    break;
+                }
+                this.user.trade(key);
                 break;
 
             case "follow":
                 this.user.follow(key);
                 break;
         }
-    }
+    };
 
     message (text) {
         var message = new (require("./Message"))(this.user, this.world, text);

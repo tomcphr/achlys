@@ -1,3 +1,9 @@
+import ContextMenu from "../ContextMenu";
+import Items from "../Items";
+import Pathfinding from "../Pathfinding";
+import Players from "../Players";
+import World from "../World";
+
 class Overworld extends Phaser.Scene {
     constructor () {
         super({
@@ -10,7 +16,6 @@ class Overworld extends Phaser.Scene {
             frameWidth: 32,
             frameHeight: 32
         };
-
         this.load.spritesheet("playerType_M", "tilesets/players/M.png", params);
         this.load.spritesheet("playerType_F", "tilesets/players/F.png", params);
         this.load.spritesheet("tiles", "tilesets/tiles.png", params);
@@ -23,114 +28,46 @@ class Overworld extends Phaser.Scene {
 
         this.socket = config.socket;
 
-        // Handle the display of the world
-        let players = this.physics.add.group();
-        let items = this.physics.add.group();
+        this.world = new World(this);
 
-        this.world = {
-            data: null,
-            tilemap: null,
-            layer: null,
-            marker: null
-        };
+        this.players = new Players(this);
 
-        config.socket.on("details", ((data) =>  {
+        this.items = new Items(this);
+
+        this.cameras.main.setZoom(1);
+
+        this.socket.on("gameTick", ((data) =>  {
+            // Don't render anything if we haven't logged in yet
             let logged = data.logged;
             if (!logged) {
                 return;
             }
 
+            // Don't try to render anything if the current player hasn't fully logged in.
             let currentPlayer = data.players[logged];
             if (!currentPlayer.loaded) {
                 return;
             }
 
-            if (JSON.stringify(data.world) !== JSON.stringify(this.world.data)) {
-                let tilemap = this.make.tilemap({
-                    data: data.world,
-                    tileWidth: 32,
-                    tileHeight: 32
-                });
-                let layer = tilemap.createStaticLayer(0, tilemap.addTilesetImage("tiles"), 0, 0);
+            let pathfinding = new Pathfinding(this, data.worldMatrix);
 
-                this.world.data = data.world;
-                this.world.tilemap = tilemap;
-                this.world.layer = layer;
+            this.renderTick(data, currentPlayer, pathfinding);
 
-                // Setup a marker, so we can represent the cursor in the world
-                this.world.marker = this.add.graphics();
-                this.world.marker.lineStyle(5, 0xffffff, 1);
-                this.world.marker.strokeRect(0, 0, 32, 32);
-                this.world.marker.lineStyle(3, 0xff4f78, 1);
-                this.world.marker.strokeRect(0, 0, 32, 32);
+            // If the current player is following someone; then find the path and follow.
+            var currentFollow = currentPlayer.following;
+            var currentWalking = currentPlayer.walking;
+            if (currentFollow && !currentWalking) {
+                let victim = data.players[currentFollow];
+
+                let newPath = pathfinding.findPath(currentPlayer.x, currentPlayer.y, victim.x, victim.y);
+                if (newPath) {
+                    // Remove the last step of the path as we don't want the user to be above the victim.
+                    newPath.pop();
+
+                    this.socket.emit("follow", newPath);
+                }
             }
-
-            this.players(this, players, data.players, data.logged);
-
-            this.items(this, items, data.items);
         }).bind(this));
-
-        this.input.on("pointerdown", (pointer)   =>  {
-            $("#contextMenu").remove();
-
-            let type = "left";
-            if (pointer.rightButtonDown()) {
-                type = "right";
-            }
-
-            this.socket.emit("click", {
-                "type"  :   type,
-                "x"     :   this.world.marker.x,
-                "y"     :   this.world.marker.y
-            });
-
-            var self = this;
-            this.socket.on("context-menu", (data)   =>  {
-                var html = "<ul id='contextMenu'>";
-                for (var id in data) {
-                    var item = data[id];
-
-                    html += "<li>";
-                        html += "<div>" + item.title + "</div>";
-                        if (Object.keys(item.options).length) {
-                            html += "<ul>";
-                                for (var option in item.options) {
-                                    var title = item.options[option];
-                                    html += "<li key='" + item.title + "' option='" + option + "'><div>" + title + "</div></li>";
-                                }
-                            html += "</ul>";
-                        }
-                    html += "</li>";
-                }
-                html += "</ul>";
-                if ($("#contextMenu").length) {
-                    $("#contextMenu").remove();
-                }
-                $("#gameContainer").append(html);
-
-                var x = pointer.event.clientX,
-                    y = pointer.event.clientY;
-                $("#contextMenu").css("top", y + "px");
-                $("#contextMenu").css("left", x + "px");
-
-                $("#contextMenu").menu({
-                    select: function (event, ui) {
-                        var key = ui.item.attr("key");
-                        if (!key) {
-                            return;
-                        }
-                        self.socket.emit("menu", {
-                            "key"       :   key,
-                            "option"    :   ui.item.attr("option")
-                        });
-                        $("#contextMenu").remove();
-                    }
-                });
-            });
-        }, this);
-
-        // Set the camera to zoom
-        this.cameras.main.setZoom(1.5);
     }
 
 
@@ -138,91 +75,66 @@ class Overworld extends Phaser.Scene {
     {
         // Convert the mouse position to world position within the camera
         const worldPoint = this.input.activePointer.positionToCamera(this.cameras.main);
-        if (this.world.data != null) {
+        if (this.world.getJson()) {
             // Place the marker in world space, but snap it to the tile grid. If we convert world -> tile and
             // then tile -> world, we end up with the position of the tile under the pointer
-            const pointerTileXY = this.world.layer.worldToTileXY(worldPoint.x, worldPoint.y);
-            const snappedWorldPoint = this.world.layer.tileToWorldXY(pointerTileXY.x, pointerTileXY.y);
-            this.world.marker.setPosition(snappedWorldPoint.x, snappedWorldPoint.y);
+            const pointerTileXY = this.world.getLayer().worldToTileXY(worldPoint.x, worldPoint.y);
+            const snappedWorldPoint = this.world.getLayer().tileToWorldXY(pointerTileXY.x, pointerTileXY.y);
+            this.world.getMarker().setPosition(snappedWorldPoint.x, snappedWorldPoint.y);
         }
     }
 
-    players (scene, group, data, logged)
+    renderTick (data, currentPlayer, pathfinding)
     {
-        group.clear(true, true);
+        // Render the world
+        let currentJson = JSON.stringify(this.world.getJson());
+        let newJson = JSON.stringify(data.worldMap);
+        if (currentJson !== newJson) {
+            this.world.render(data.worldMap);
+        }
 
-        for (let id in data) {
-            let player = data[id];
+        // clicking.
+        this.input.off("pointerdown");
+        this.input.on("pointerdown", (pointer)   =>  {
+            $("#contextMenu").remove();
+            if (pointer.rightButtonDown()) {
+                let contextMenu = new ContextMenu(this.scene, this.socket);
 
-            let image = "playerType_" + player.avatar;
+                let marker = this.world.getMarker();
 
-            let startFrame = null;
+                let players = this.players.getAtXY(marker.x, marker.y);
+                for (var id in players) {
+                    var username = players[id];
 
-            switch (player.facing) {
-                case "up":
-                    startFrame = 0;
-                    break;
-                case "down":
-                    startFrame = 6;
-                    break;
+                    // Don't allow the current player to select themselves
+                    if (username === currentPlayer.id) {
+                        continue;
+                    }
 
-                case "right":
-                    startFrame = 3;
-                    break;
-
-                case "left":
-                    startFrame = 9;
-                    break;
-            }
-
-            let sprite = scene.physics.add.image(
-                player.x,
-                player.y,
-                image,
-                (startFrame + player.frame)
-            );
-            sprite.setOrigin(0, 0);
-
-            if (logged === id) {
-                scene.cameras.main.startFollow(sprite);
-            }
-            let health = scene.add.text(player.x, player.y - 5, player.health + "/" + player.maxHealth, { fontSize: "9px", fill: "#000" });
-
-            group.add(sprite);
-            group.add(health);
-
-            // Handle for any messages that the user may have associated with them
-            if (player.message.id && player.message.text) {
-                let divExists = $("#" + player.message.id).length;
-                if (!divExists) {
-                    let messageDiv = $("<div>", {
-                        "id"    :   player.message.id,
-                        "class" :   "historicMessage"
-                    }).text(player.id + ": " + player.message.text);
-                    $("#messageHistory").append(messageDiv);
+                    contextMenu.addOptions(username, {
+                        "attack"    :   "Attack",
+                        "trade"     :   "Trade",
+                        "follow"    :   "Follow"
+                    });
                 }
+
+                var clientX = pointer.event.clientX;
+                var clientY = pointer.event.clientY;
+                contextMenu.render(clientX, clientY);
+
+                return;
             }
-        }
-    }
 
+            let newPath = pathfinding.findPath(currentPlayer.x, currentPlayer.y, this.world.marker.x, this.world.marker.y);
 
-    items (scene, group, data)
-    {
-        group.clear(true, true);
+            this.socket.emit("click", newPath);
+        }, this);
 
-        for (let id in data) {
-            let item = data[id];
+        // Generate players
+        this.players.render(data.players, currentPlayer.id);
 
-            let sprite = scene.physics.add.image(
-                item.x,
-                item.y,
-                "items",
-                (item.id - 1),
-            );
-            sprite.setOrigin(0, 0);
-
-            group.add(sprite);
-        }
+        // Generate items
+        this.items.render(data.items);
     }
 }
 
