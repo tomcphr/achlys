@@ -25,21 +25,26 @@ class World {
 
                 var user = self.updateUser(session);
 
+                // Ensure that we only try to follow when the player has completed a full tile.
+                var following = user.following;
+                if (user.walking) {
+                    following = "";
+                }
+
                 packet.players[user.id] = {
-                    "loaded"    :   user.loaded,
-                    "id"        :   user.id,
-                    "health"    :   user.health,
-                    "maxHealth" :   user.maxHealth,
-                    "avatar"    :   user.avatar,
-                    "facing"    :   user.facing,
-                    "frame"     :   Math.ceil(user.frame),
-                    "x"         :   user.x,
-                    "y"         :   user.y,
-                    "following" :   user.following,
-                    "walking"   :   user.walking,
-                    "message"   :   {
-                        "id"        :   user.message.id,
-                        "text"      :   user.message.text,
+                    "loaded"            :   user.loaded,
+                    "id"                :   user.id,
+                    "health"            :   user.health,
+                    "maxHealth"         :   user.maxHealth,
+                    "avatar"            :   user.avatar,
+                    "facing"            :   user.facing,
+                    "frame"             :   Math.ceil(user.frame),
+                    "x"                 :   user.x,
+                    "y"                 :   user.y,
+                    "following"         :   following,
+                    "message"           :   {
+                        "id"                :   user.message.id,
+                        "text"              :   user.message.text,
                     }
                 };
             }

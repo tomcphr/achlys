@@ -55,16 +55,17 @@ class Overworld extends Phaser.Scene {
 
             // If the current player is following someone; then find the path and follow.
             var currentFollow = currentPlayer.following;
-            var currentWalking = currentPlayer.walking;
-            if (currentFollow && !currentWalking) {
-                let victim = data.players[currentFollow];
+            if (currentFollow) {
+                if (currentFollow in data.players) {
+                    let victim = data.players[currentFollow];
 
-                let newPath = pathfinding.findPath(currentPlayer.x, currentPlayer.y, victim.x, victim.y);
-                if (newPath) {
-                    // Remove the last step of the path as we don't want the user to be above the victim.
-                    newPath.pop();
+                    let newPath = pathfinding.findPath(currentPlayer.x, currentPlayer.y, victim.x, victim.y);
+                    if (newPath) {
+                        // Remove the last step of the path as we don't want the user to be above the victim.
+                        newPath.pop();
 
-                    this.socket.emit("follow", newPath);
+                        this.socket.emit("follow", newPath);
+                    }
                 }
             }
         }).bind(this));
