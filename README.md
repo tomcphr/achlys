@@ -5,8 +5,6 @@ A small web-based MMO
 ### Combat
 * Attacking animations
 * Damage calculator
-### Skills
-?
 ### Equipment
 * Armour
 * Weapons
