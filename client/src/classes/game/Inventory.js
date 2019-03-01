@@ -13,7 +13,7 @@ class Inventory {
             title: "Inventory",
             appendTo: "#gameContainer",
             resizable: false,
-            width: 480,
+            width: 410,
             height: 300
         });
 
@@ -53,6 +53,14 @@ class Inventory {
             $("#itemDetail").hide();
             $("#itemHolder").css("width", "100%");
             self.updateInventory();
+        });
+
+        $("#itemHolder").not(".itemContainer").on("click", function () {
+            var detailVisible = $("#itemDetail").is(":visible");
+            if (detailVisible) {
+                $("#itemDetail").hide();
+                $("#itemHolder").css("width", "100%");
+            }
         });
 
         $(document).on("click", ".itemContainer", function () {
@@ -219,8 +227,7 @@ class Inventory {
             template.html += "data-equipped='" + template.equipped + "' ";
         template.html += ">";
         template.html += "<img class='itemImage' src='" + base64 + "'>";
-        //template.html += "<div class='itemText'>" + template.name + "</div>";
-        //template.html += "<div class='itemQuantity'>" + template.display + "</div>";
+        template.html += "<div class='itemQuantity'>" + template.display + "</div>";
         template.html += "</div>";
 
         return template;

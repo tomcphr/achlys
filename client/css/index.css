@@ -69,6 +69,7 @@
     padding: 5px;
     float: left;
 }
+
 #itemDetail {
     width: 33%;
     float: left;
@@ -115,29 +116,30 @@
 .itemContainer {
     cursor: pointer;
     border: 1px solid #000;
-    width: 100%;
-    height: 34px;
-    padding-left: 1px;
-    padding-right: 1px;
-    padding-top: 1px;
-    margin-bottom: 1px;
+    width: 50px;
+    height: 60px;
+    padding: 5px;
+    margin: 2px;
     font-size: 10px;
     box-sizing: border-box;
+    float: left;
+    position: relative;
 }
 .itemImage {
-    float: left;
-    margin-right: 5px;
-    user-select: none;
-}
-.itemText {
-    float: left;
-    font-size: 15px;
-    padding: 4px;
+    margin: 0;
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    -ms-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
 }
 .itemQuantity {
-    float: right;
-    font-size: 15px;
-    padding: 4px;
+    margin: 0;
+    position: absolute;
+    top: 85%;
+    left: 50%;
+    -ms-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
 }
 
 /** Chat **/
