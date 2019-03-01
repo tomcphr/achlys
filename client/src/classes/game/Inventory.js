@@ -40,7 +40,8 @@ class Inventory {
                 inventory += "<div id='detailText'></div>";
                 inventory += "<div id='detailActions'>";
                     inventory += "<input type='number' id='quantitySelect' min='1' max='1'>";
-                    inventory += "<button id='dropItem'>Drop</button>";
+                    inventory += "<button id='equipItem' class='inventoryButton hidden'>Equip</button>"
+                    inventory += "<button id='dropItem' class='inventoryButton'>Drop</button>";
                 inventory += "</div>";
             inventory += "</div>";
         inventory += "</div>";
@@ -60,13 +61,22 @@ class Inventory {
             let name = $(this).attr("data-name");
             let description = $(this).attr("data-description");
             let quantity = $(this).attr("data-quantity");
+            let equipable = $(this).attr("data-equipable");
+            let equipped = $(this).attr("data-equipped");
 
             $("#detailText").html(description);
             $("#detailName").html(name);
 
-            $("#equipItem").attr("data-item", item);
-
+            $("#equipItem").attr("data-record", record);
             $("#dropItem").attr("data-record", record);
+
+            $("#equipItem").hide();
+            if (equipable == "1") {
+                $("#equipItem").show();
+                if (equipped == "1") {
+                    $("#equipItem").html("Unequip");
+                }
+            }
 
             $("#quantitySelect").val(quantity);
             $("#quantitySelect").attr("max", quantity);
@@ -93,6 +103,18 @@ class Inventory {
             let quantity = $("#quantitySelect").val();
 
             self.config.socket.emit("drop", record, quantity, (type, message)   =>  {
+                if (!type) {
+                    alert(message);
+                    return;
+                }
+            });
+        });
+
+        $(document).on("click", "#equipItem", function () {
+            let record = $(this).attr("data-record");
+            let quantity = $("#quantitySelect").val();
+
+            self.config.socket.emit("equip", record, quantity, (type, message)   =>  {
                 if (!type) {
                     alert(message);
                     return;
@@ -152,6 +174,8 @@ class Inventory {
             "quantity"          :   "1",
             "display"           :   "1",
             "html"              :   "",
+            "equipable"         :   "0",
+            "equipped"          :   "0",
         };
         for (var property in template) {
             if (!item.hasOwnProperty(property)) {
@@ -191,10 +215,12 @@ class Inventory {
             template.html += "data-name='" + template.name + "' ";
             template.html += "data-description='" + template.description + "' ";
             template.html += "data-quantity='" + template.quantity + "' ";
+            template.html += "data-equipable='" + template.equipable + "' ";
+            template.html += "data-equipped='" + template.equipped + "' ";
         template.html += ">";
         template.html += "<img class='itemImage' src='" + base64 + "'>";
-        template.html += "<div class='itemText'>" + template.name + "</div>";
-        template.html += "<div class='itemQuantity'>" + template.display + "</div>";
+        //template.html += "<div class='itemText'>" + template.name + "</div>";
+        //template.html += "<div class='itemQuantity'>" + template.display + "</div>";
         template.html += "</div>";
 
         return template;

@@ -21,6 +21,7 @@ class User {
         };
 
         this.inventory = new (require("./Inventory"))(sql, session, username);
+        this.equipment = new (require("./Equipment"))(sql, session, username);
     };
 
     getUserData (username, callback) {
@@ -221,6 +222,12 @@ class User {
                 self.world.addDrop(message.item, message.name, quantity, x, y);
             }
 
+            callback(status, message);
+        });
+    };
+
+    equip (inventoryId, quantity, callback) {
+        this.equipment.equipItem(inventoryId, quantity, (status, message) =>  {
             callback(status, message);
         });
     };

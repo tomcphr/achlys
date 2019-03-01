@@ -106,7 +106,7 @@
     padding: 7px;
 }
 
-#quantitySelect, #dropItem {
+#quantitySelect, .inventoryButton {
     width: 100%;
     box-sizing: border-box;
     margin-bottom: 5px;

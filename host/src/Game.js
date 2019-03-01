@@ -15,6 +15,7 @@ class Game {
         this.listens = [
             "items",
             "drop",
+            "equip",
             "message",
             "click",
             "follow",
@@ -63,7 +64,20 @@ class Game {
             }
 
             callback(status, message);
-        })
+        });
+    };
+
+    equip (inventoryId, quantity, callback) {
+        let self = this;
+        this.user.equip(inventoryId, quantity, (status, message)  =>  {
+            if (status) {
+                self.session.getSocket().emit("updated-items");
+            } else {
+                console.log("Equip Issue:", status, message);
+            }
+
+            callback(status, message);
+        });
     };
 
     click (data) {

@@ -11,10 +11,11 @@ class Inventory {
 
     getItems (callback) {
         var query = [
-            "SELECT a.id `record`, b.id `item`, b.name, b.description, a.quantity",
+            "SELECT a.id `record`, b.id `item`, b.name, b.description, a.quantity, b.equipable, CASE WHEN c.id IS NULL THEN '0' ELSE '1' END `equipped`",
             "FROM inventories a",
             "JOIN items b ON b.id = a.item",
-            "WHERE a.?"
+            "LEFT OUTER JOIN equipped c ON c.username = a.username AND c.item = a.item",
+            "WHERE a.? "
         ];
         query = query.join(" ");
 
@@ -174,8 +175,8 @@ class Inventory {
             }).catch((error) =>  {
                 callback(false, error);
             });
-        }).catch(() =>  {
-            callback(false, "Couldn't retrieve item from inventory");
+        }).catch((error) =>  {
+            callback(false, "Couldn't retrieve item from inventory: " + error);
         });
     };
 };
