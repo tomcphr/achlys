@@ -25,8 +25,8 @@ class Inventory {
     };
 
     create () {
-        let html = "<img id='inventoryButton' src='gui/inventory-button.png'></img>";
-        $("#gameContainer").append(html);
+        let html = "<img id='inventoryButton' class='menuButton' src='gui/inventory-button.png'></img>";
+        $("#menuButtons").append(html);
         this.resetInventoryClicks();
     }
 
