@@ -82,7 +82,7 @@ class Inventory {
             if (equipable == "1") {
                 $("#equipItem").show();
                 if (equipped == "1") {
-                    $("#equipItem").html("Unequip");
+                    $("#equipItem").hide();
                 }
             }
 
