@@ -12,7 +12,7 @@ class Game {
         this.socket = socket;
 
         this.game = new Phaser.Game({
-            type: Phaser.AUTO,
+            type: Phaser.CANVAS,
             physics: {
                 default: "arcade",
                 arcade: {
