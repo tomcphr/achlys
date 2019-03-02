@@ -56,6 +56,18 @@
     margin: 3px;
 }
 
+#chatButton {
+    position: fixed;
+    left: 0%;
+    bottom: 0%;
+    transform: translate(10%, 10%);
+    margin: 0 auto;
+    box-sizing: border-box;
+    cursor: pointer;
+    width: 48px;
+    height: 48px;
+}
+
 /** Inventory **/
 #inventoryContents {
     width: 100%;
@@ -151,7 +163,7 @@
     position: fixed;
     left: 0%;
     bottom: 0%;
-    transform: translate(2.5%, -5%);
+    transform: translate(10%, 10%);
     margin: 0 auto;
     width: 30%;
     height: 125px;

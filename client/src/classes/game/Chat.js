@@ -38,7 +38,7 @@ class Chat {
             $("#messageText").val("");
         });
         let chatButton = "<img id='chatButton' class='menuButton' src='gui/chat-button.png'></img>";
-        $("#menuButtons").append(chatButton);
+        $("#ui-chat").append(chatButton);
         $("#chatButton").off("click");
         $("#chatButton").on("click", () =>  {
             let visible = $("#messageContainer").is(":visible");
