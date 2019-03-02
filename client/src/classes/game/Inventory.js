@@ -1,37 +1,15 @@
-class Inventory {
+import UserDialog from "./UserDialog";
+class Inventory extends UserDialog {
     constructor(scene, config) {
-        this.create();
+        super("Inventory", "#ui-inventory", "gui/inventory-button.png");
 
         this.scene = scene;
 
         this.config = config;
-
-        this.displayed = false;
-
-        $("#ui-inventory").dialog({
-            autoOpen: false,
-            title: "Inventory",
-            appendTo: "#gameContainer",
-            resizable: false,
-            width: 410,
-            height: 300
-        });
-
-        $("#ui-inventory").dialog("widget").draggable("option", "containment", "#gameContainer");
-
-        $(window).resize(function() {
-            $("#ui-inventory").dialog("option", "position", {my: "center", at: "center", of: window});
-        });
     };
 
-    create () {
-        let html = "<img id='inventoryButton' class='menuButton' src='gui/inventory-button.png'></img>";
-        $("#menuButtons").append(html);
-        this.resetInventoryClicks();
-    }
-
     open () {
-        $("#ui-inventory").dialog("open");
+        super.open();
 
         let inventory = "<div id='inventoryContents'>";
             inventory += "<div id='itemHolder'></div>";
@@ -129,38 +107,14 @@ class Inventory {
                 }
             });
         });
-
-        self.displayed = true;
     };
-
-    close () {
-        this.resetInventoryClicks();
-
-        $("#ui-inventory").html("");
-
-        $("#ui-inventory").dialog("close");
-
-        this.displayed = false;
-    };
-
-    resetInventoryClicks () {
-        var self = this;
-        $(document).off("click");
-        $(document).on("click", "#inventoryButton", ()  =>  {
-            if (self.displayed) {
-                self.close();
-            } else {
-                self.open();
-            }
-        });
-    }
 
     updateInventory () {
         let self = this;
         this.getItems((items)    =>   {
             self.displayItems(items);
         });
-    }
+    };
 
     displayItems (items) {
         $("#itemHolder").html("");
@@ -171,7 +125,7 @@ class Inventory {
 
             $("#itemHolder").append(itemDetail.html);
         }
-    }
+    };
 
     getItemDetail (item) {
         var template = {

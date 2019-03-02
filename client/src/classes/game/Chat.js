@@ -8,7 +8,7 @@ class Chat {
     };
 
     create() {
-        let html = "<div id='messageContainer' class='hidden'>";
+        let html = "<div id='messageContainer'>";
                 html += "<div id='messageHistory'></div>";
                 html += "<div id='currentMessage'>";
                     html += "<input type='text' name='message' id='messageText'>";
@@ -36,17 +36,6 @@ class Chat {
             self.config.socket.emit("message", message);
 
             $("#messageText").val("");
-        });
-        let chatButton = "<img id='chatButton' class='menuButton' src='gui/chat-button.png'></img>";
-        $("#ui-chat").append(chatButton);
-        $("#chatButton").off("click");
-        $("#chatButton").on("click", () =>  {
-            let visible = $("#messageContainer").is(":visible");
-            if (visible) {
-                $("#messageContainer").hide();
-                return;
-            }
-            $("#messageContainer").show();
         });
     };
 };

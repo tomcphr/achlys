@@ -1,15 +1,11 @@
-class Equipment {
+import UserDialog from "./UserDialog";
+class Equipment extends UserDialog {
     constructor(scene, config) {
-        this.create();
+        super("Equipment", "#ui-equipment", "gui/equipment-button.png");
 
         this.scene = scene;
 
         this.config = config;
-    };
-
-    create () {
-        let html = "<img id='equipmentButton' class='menuButton' src='gui/equipment-button.png'></img>";
-        $("#menuButtons").append(html);
     };
 }
 export default Equipment;

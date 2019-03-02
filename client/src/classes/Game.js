@@ -6,6 +6,7 @@ class Game {
         var gameContainer = "<div id='gameContainer'>";
                 gameContainer += "<div id='ui-chat'></div>";
                 gameContainer += "<div id='ui-inventory'></div>";
+                gameContainer += "<div id='ui-equipment'></div>";
             gameContainer += "</div>";
         $("body").append(gameContainer);
 
