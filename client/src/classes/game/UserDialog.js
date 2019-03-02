@@ -13,8 +13,10 @@ class UserDialog {
             autoOpen: false,
             title: title,
             appendTo: "#gameContainer",
-            resizable: false,
-            width: 410,
+            resizable: true,
+            minWidth: 450,
+            minHeight: 300,
+            width: 450,
             height: 300
         });
 
