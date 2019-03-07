@@ -29,8 +29,9 @@ CREATE TABLE `equipped` (
     `username` VARCHAR(30) NOT NULL,
     `item` INT NOT NULL,
     `quantity` INT NOT NULL,
+    `type` INT NOT NULL,
     PRIMARY KEY (`id`),
-    CONSTRAINT UNIQUE (`username`, `item`)
+    CONSTRAINT UNIQUE (`username`, `item`, `type`)
 ) ENGINE = InnoDB;
 
 CREATE TABLE `items` (
@@ -39,14 +40,15 @@ CREATE TABLE `items` (
     `description` VARCHAR(256) NOT NULL,
     `tradable` INT NOT NULL,
     `equipable` INT NOT NULL,
+    `type` INT NOT NULL,
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB;
 
-INSERT INTO `items` (name, description, tradable, equipable)
+INSERT INTO `items` (name, description, tradable, equipable, type)
 VALUES
-("Coins", "Lovely Money!", 1, 0),
-("Blade of Eben", "A sharp, distinctive blade", 0, 1),
-("Staff of Jingle", "Memories of what once was", 1, 0);
+("Coins", "Lovely Money!", 1, 0, 0),
+("Blade of Eben", "A sharp, distinctive blade", 0, 1, 1),
+("Staff of Jingle", "Memories of what once was", 1, 0, 1);
 
 CREATE TABLE `inventories` (
     `id` INT NOT NULL AUTO_INCREMENT,

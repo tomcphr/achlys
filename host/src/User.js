@@ -186,6 +186,12 @@ class User {
         });
     };
 
+    getEquipment (callback) {
+        this.equipment.getEqupped((status, message) =>  {
+            callback(status, message);
+        });
+    };
+
     pickup (item, quantity) {
         this.inventory.addItem(item, quantity);
     };

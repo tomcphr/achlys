@@ -14,6 +14,7 @@ class Game {
 
         this.listens = [
             "items",
+            "equipped",
             "drop",
             "equip",
             "message",
@@ -50,6 +51,12 @@ class Game {
 
     items (callback) {
         this.user.getItems((type, message) =>  {
+            callback(type, message);
+        });
+    };
+
+    equipped (callback) {
+        this.user.getEquipment((type, message) =>  {
             callback(type, message);
         });
     };

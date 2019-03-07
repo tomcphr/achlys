@@ -7,5 +7,38 @@ class Equipment extends UserDialog {
 
         this.config = config;
     };
+
+    open() {
+        super.open();
+
+        this.getEquipped((data) =>  {
+            console.log(data);
+        });
+    };
+
+    getEquipped(callback) {
+        this.config.socket.emit("equipped", (type, message)    =>  {
+            if (!type) {
+                return;
+            }
+
+            let equipment = [];
+            for (var i = 0; i < message.length; i++) {
+                let item = message[i];
+
+                equipment.push(item);
+            }
+
+            callback(equipment);
+        });
+    };
+
+    getTypes () {
+        return {
+            "0" :   "Items",
+            "1" :   "Weapons",
+            "2" :   "Armour",
+        };
+    };
 }
 export default Equipment;
